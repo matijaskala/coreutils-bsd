@@ -1,5 +1,5 @@
-PROGS =	cat chmod cp date df domainname echo expr hostname kill ln ls mkdir mv pwd rm rmdir sleep sync test \
-	md5 realpath basename which
+PROGS = cat chmod cp date df domainname echo expr hostname kill ln ls mkdir mv pwd rm rmdir sleep stty sync test \
+        md5 realpath arch base64 basename cksum comm csplit dirname split tty which yes chroot
 
 all: $(PROGS:%=build-%)
 
