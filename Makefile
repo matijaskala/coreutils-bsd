@@ -21,16 +21,16 @@ build-%: usr.sbin/%
 	@$(MAKE) -C $<
 
 install-%: bin/%
-	@$(MAKE) -C $< install DESTDIR=$(shell test -n '$(DESTDIR)' && realpath $(DESTDIR))
+	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
 
 install-%: sbin/%
-	@$(MAKE) -C $< install DESTDIR=$(shell test -n '$(DESTDIR)' && realpath $(DESTDIR))
+	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
 
 install-%: usr.bin/%
-	@$(MAKE) -C $< install DESTDIR=$(shell test -n '$(DESTDIR)' && realpath $(DESTDIR))
+	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
 
 install-%: usr.sbin/%
-	@$(MAKE) -C $< install DESTDIR=$(shell test -n '$(DESTDIR)' && realpath $(DESTDIR))
+	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
 
 clean-%: bin/%
 	@$(MAKE) -C $< clean

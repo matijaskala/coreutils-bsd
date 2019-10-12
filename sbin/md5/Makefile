@@ -2,7 +2,7 @@ include ../../common.mk
 
 CFLAGS += $(shell pkg-config --cflags --libs libcrypto)
 
-install: install-rm
+install: install-md5
 	ln -sf md5 $(DESTDIR)/bin/rmd160
 	ln -sf md5 $(DESTDIR)/bin/sha1
 	ln -sf md5 $(DESTDIR)/bin/sha256
