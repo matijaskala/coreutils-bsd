@@ -1,9 +1,6 @@
 include ../../common.mk
 
-rm: rm.c ../pwcache.o
-
-../pwcache.o:
-	@$(MAKE) -C .. pwcache.o
+rm: rm.c ../../pwcache.o
 
 install: install-rm
 	ln -sf rm $(DESTDIR)/bin/unlink

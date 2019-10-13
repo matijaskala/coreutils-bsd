@@ -1,9 +1,6 @@
 include ../../common.mk
 
-chmod: chmod.c ../pwcache.o
-
-../pwcache.o:
-	@$(MAKE) -C .. pwcache.o
+chmod: chmod.c ../../pwcache.o
 
 install: install-chmod
 	ln -sf ../bin/chmod $(DESTDIR)/bin/chgrp

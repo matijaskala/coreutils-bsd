@@ -1,3 +1,3 @@
 include ../../common.mk
 
-mv: mv.c ../../pwcache.o
+CFLAGS += -D_GNU_SOURCE

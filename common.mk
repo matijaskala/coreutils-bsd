@@ -14,3 +14,6 @@ install-%: % %.[12345678]
 
 clean:
 	$(RM) $(PROGS)
+
+../../%.o: ../../%.c
+	@$(MAKE) -C ../.. $(shell basename $@)

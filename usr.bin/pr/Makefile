@@ -1,3 +1,3 @@
 include ../../common.mk
 
-mv: mv.c ../../pwcache.o
+pr: pr.c egetopt.c
