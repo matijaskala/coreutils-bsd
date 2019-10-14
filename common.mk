@@ -1,6 +1,6 @@
 CFLAGS += $(shell pkg-config --cflags --libs libbsd-overlay)
 BINDIR = $(DESTDIR)/$(subst .,/,$(shell basename $(shell dirname $(CURDIR))))
-PROGS = $(shell basename $(CURDIR))
+PROGS ?= $(shell basename $(CURDIR))
 
 all: $(PROGS)
 
