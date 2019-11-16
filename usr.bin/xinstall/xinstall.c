@@ -67,6 +67,7 @@ char pathbuf[PATH_MAX], tempfile[PATH_MAX];
 char *suffix = BACKUP_SUFFIX;
 uid_t uid = (uid_t)-1;
 gid_t gid = (gid_t)-1;
+int Tflag;
 
 void	copy(int, char *, int, char *, off_t, int);
 int	compare(int, const char *, off_t, int, const char *, off_t);
@@ -89,7 +90,8 @@ main(int argc, char *argv[])
 	const char *errstr;
 
 	iflags = 0;
-	while ((ch = getopt(argc, argv, "B:bCcDdF:g:m:o:pSs")) != -1)
+	Tflag = 0;
+	while ((ch = getopt(argc, argv, "B:bCcDdF:g:m:o:pSsT")) != -1)
 		switch(ch) {
 		case 'C':
 			docompare = 1;
@@ -132,6 +134,9 @@ main(int argc, char *argv[])
 			break;
 		case 'd':
 			dodir = 1;
+			break;
+		case 'T':
+			Tflag = 1;
 			break;
 		case '?':
 		default:
@@ -180,7 +185,7 @@ main(int argc, char *argv[])
 	}
 
 	no_target = stat(to_name = argv[argc - 1], &to_sb);
-	if (!no_target && S_ISDIR(to_sb.st_mode)) {
+	if (!Tflag && !no_target && S_ISDIR(to_sb.st_mode)) {
 		for (; *argv != to_name; ++argv)
 			install(*argv, to_name, iflags | DIRECTORY);
 		exit(0);
