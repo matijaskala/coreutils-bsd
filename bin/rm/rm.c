@@ -455,7 +455,7 @@ check(const char *path, const char *name, struct stat *sp)
 		{ 'v', "never" , 0, 1 },
 		{ 0, NULL, 0, 0 }
 	};
-	char modep[15], *flagsp;
+	char modep[15];
 
 	if (perm_answer != -1)
 		return (perm_answer);
@@ -474,13 +474,11 @@ check(const char *path, const char *name, struct stat *sp)
 	         * barf later.
 		 */
 		strmode(sp->st_mode, modep);
-		fprintf(stderr, "override %s%s%s/%s %s%sfor %s? ",
+		fprintf(stderr, "override %s%s%s:%s for '%s'? ",
 		    modep + 1, modep[9] == ' ' ? "" : " ",
 		    user_from_uid(sp->st_uid, 0),
 		    group_from_gid(sp->st_gid, 0),
-		    *flagsp ? flagsp : "", *flagsp ? " " : "",
 		    path);
-		free(flagsp);
 	}
 	fflush(stderr);
 
