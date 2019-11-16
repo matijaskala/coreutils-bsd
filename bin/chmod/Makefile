@@ -3,7 +3,7 @@ include ../../common.mk
 chmod: chmod.c ../../pwcache.o
 
 install: install-chmod
-	ln -sf ../bin/chmod $(DESTDIR)/bin/chgrp
+	ln -sf chmod $(DESTDIR)/bin/chgrp
 	install -d $(DESTDIR)/sbin
 	ln -sf ../bin/chmod $(DESTDIR)/sbin/chown
 	install -m644 chgrp.1 $(DESTDIR)/usr/share/man/man1
