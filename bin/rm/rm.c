@@ -473,6 +473,9 @@ check(const char *path, const char *name, struct stat *sp)
 	         * we will not be able to overwrite file contents and will
 	         * barf later.
 		 */
+		if (!stdin_ok || S_ISLNK(sp->st_mode) || !access(name, W_OK) ||
+		    errno != EACCES)
+			return (1);
 		strmode(sp->st_mode, modep);
 		fprintf(stderr, "override %s%s%s:%s for '%s'? ",
 		    modep + 1, modep[9] == ' ' ? "" : " ",
