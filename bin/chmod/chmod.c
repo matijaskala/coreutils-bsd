@@ -281,7 +281,7 @@ done:
 		if (ischmod) {
 			if (!fchmodat(AT_FDCWD, p->fts_accpath, oct ? omode :
 			    getmode(set, p->fts_statp->st_mode), atflags)
-			    || fflag)
+			    || errno == ENOTSUP || fflag)
 				continue;
 		} else
 #ifdef ENABLE_CHFLAGS
