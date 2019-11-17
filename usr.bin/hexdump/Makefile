@@ -1,5 +1,7 @@
 include ../../common.mk
 
+CFLAGS += -D_GNU_SOURCE
+
 hexdump: conv.c display.c hexdump.c hexsyntax.c odsyntax.c parse.c
 
 install: install-hexdump
