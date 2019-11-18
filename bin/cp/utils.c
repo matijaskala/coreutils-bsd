@@ -388,7 +388,7 @@ setfile(struct stat *fs, int fd)
 
 	if (!gotstat || fs->st_mode != ts.st_mode)
 		if (fdval ? fchmod(fd, fs->st_mode) :
-		    (islink ? lchmod(to.p_path, fs->st_mode) :
+		    (islink ? lchmod(to.p_path, fs->st_mode) && errno != ENOTSUP :
 		    chmod(to.p_path, fs->st_mode))) {
 			warn("chmod: %s", to.p_path);
 			rval = 1;

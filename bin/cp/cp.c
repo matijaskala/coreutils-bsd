@@ -86,7 +86,7 @@ static char emptystring[] = "";
 PATH_T to = { to.p_path, emptystring, "" };
 
 int fflag, iflag, lflag, nflag, pflag, sflag, vflag;
-static int Rflag, rflag;
+static int Rflag, dflag, rflag;
 volatile sig_atomic_t info;
 
 enum op { FILE_TO_FILE, FILE_TO_DIR, DIR_TO_DNE };
@@ -103,7 +103,7 @@ main(int argc, char *argv[])
 
 	fts_options = FTS_NOCHDIR | FTS_PHYSICAL;
 	Hflag = Lflag = 0;
-	while ((ch = getopt(argc, argv, "HLPRafilnprsvx")) != -1)
+	while ((ch = getopt(argc, argv, "HLPRadfilnprsvx")) != -1)
 		switch (ch) {
 		case 'H':
 			Hflag = 1;
@@ -123,6 +123,9 @@ main(int argc, char *argv[])
 			pflag = 1;
 			Rflag = 1;
 			Hflag = Lflag = 0;
+			break;
+		case 'd':
+			dflag = 1;
 			break;
 		case 'f':
 			fflag = 1;
@@ -178,7 +181,7 @@ main(int argc, char *argv[])
 			fts_options &= ~FTS_PHYSICAL;
 			fts_options |= FTS_LOGICAL;
 		}
-	} else {
+	} else if (!dflag) {
 		fts_options &= ~FTS_PHYSICAL;
 		fts_options |= FTS_LOGICAL | FTS_COMFOLLOW;
 	}
