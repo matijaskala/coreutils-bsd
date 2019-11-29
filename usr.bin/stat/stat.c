@@ -220,7 +220,7 @@ main(int argc, char *argv[])
 		fmtchar = 'f';
 		quiet = 1;
 	} else {
-		options = "f:FlLnqrst:x";
+		options = "c:f:FlLnqrst:x";
 		synopsis = "[-FLnq] [-f format | -l | -r | -s | -x] "
 		    "[-t timefmt] [file|handle ...]";
 	}
@@ -239,6 +239,7 @@ main(int argc, char *argv[])
 		case 'q':
 			quiet = 1;
 			break;
+		case 'c':
 		case 'f':
 			if (am_readlink) {
 				statfmt = "%R";
