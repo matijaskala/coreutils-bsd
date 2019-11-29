@@ -173,7 +173,9 @@ main(int argc, char *argv[])
 	}
 
 	if (dodest) {
-		char *dest = dirname(argv[argc - 1]);
+		char *tmp = strdup(argv[argc - 1]);
+		char *dest = dirname(tmp);
+		free(tmp);
 		if (dest == NULL)
 			errx(1, "cannot determine dirname");
 		/*
