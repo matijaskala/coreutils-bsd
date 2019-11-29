@@ -175,7 +175,6 @@ main(int argc, char *argv[])
 	if (dodest) {
 		char *tmp = strdup(argv[argc - 1]);
 		char *dest = dirname(tmp);
-		free(tmp);
 		if (dest == NULL)
 			errx(1, "cannot determine dirname");
 		/*
@@ -184,6 +183,7 @@ main(int argc, char *argv[])
 		 * '-d -m' ought to be used instead.
 		 */
 		install_dir(dest, 0755);
+		free(tmp);
 	}
 
 	no_target = stat(to_name = argv[argc - 1], &to_sb);
