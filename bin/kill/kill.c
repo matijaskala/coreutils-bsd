@@ -58,6 +58,7 @@ __RCSID("$NetBSD: kill.c,v 1.30 2018/12/12 20:22:43 kre Exp $");
 #include <sys/ioctl.h>
 
 extern const char *const sys_sigabbrev[];
+void sys_sigabbrev_init();
 
 #ifdef SHELL            /* sh (aka ash) builtin */
 int killcmd(int, char *argv[]);
@@ -79,6 +80,7 @@ main(int argc, char *argv[])
 	pid_t pid;
 	const char *sn;
 
+	sys_sigabbrev_init();
 	setprogname(argv[0]);
 	setlocale(LC_ALL, "");
 	if (argc < 2)

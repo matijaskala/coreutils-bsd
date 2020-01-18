@@ -54,6 +54,7 @@ __RCSID("$NetBSD: timeout.c,v 1.4 2014/08/05 08:20:02 christos Exp $");
 #define EXIT_TIMEOUT 124
 
 extern const char *const sys_sigabbrev[];
+void sys_sigabbrev_init();
 
 static sig_atomic_t sig_chld = 0;
 static sig_atomic_t sig_term = 0;
@@ -206,6 +207,7 @@ main(int argc, char **argv)
 		SIGQUIT,
 	};
 
+	sys_sigabbrev_init();
 	setprogname(argv[0]);
 
 	foreground = preserve = 0;
