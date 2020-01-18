@@ -98,7 +98,9 @@ print(struct termios *tp, struct winsize *wp, int ldisc, enum FMT fmt)
 	put("-tostop", TOSTOP, 0);
 	put("-flusho", FLUSHO, 0);
 	put("-pendin", PENDIN, 0);
+#ifdef EXTPROC
 	put("-extproc", EXTPROC, 0);
+#endif
 
 	/* input flags */
 	tmp = tp->c_iflag;

@@ -18,14 +18,14 @@ clean-generated:
 
 NLS += C
 
-ifneq ($(MK_SORT_THREADS), "no")
+ifneq ($(MK_SORT_THREADS), no)
 CFLAGS+= -DSORT_THREADS -lpthread
 MAN_SUB+= -e 's|%%THREADS%%||g'
 else
 MAN_SUB+= -e 's|%%THREADS%%|\.\\"|g'
 endif
 
-ifneq ($(MK_NLS), "no")
+ifneq ($(MK_NLS), no)
 NLS+=	hu_HU.ISO8859-2
 NLSSRCFILES= ${NLS:S@$@.msg@}
 MAN_SUB+= -e 's|%%NLS%%||g'
