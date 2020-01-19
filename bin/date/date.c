@@ -142,7 +142,7 @@ main(int argc, char *argv[])
 			break;
 		case 'r':		/* user specified seconds */
 			rflag = 1;
-			tval = strtoq(optarg, &tmp, 0);
+			tval = strtoll(optarg, &tmp, 0);
 			if (*tmp != 0) {
 				if (stat(optarg, &sb) == 0)
 					tval = sb.st_mtim.tv_sec;
