@@ -46,6 +46,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef DEFFILEMODE
+#define DEFFILEMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
+#endif
+
 static void	stime_arg1(const char *, struct timeval *);
 static void	stime_arg2(const char *, int, struct timeval *);
 static void	stime_darg(const char *, struct timeval *);

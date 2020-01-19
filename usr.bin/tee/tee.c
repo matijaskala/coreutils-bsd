@@ -54,6 +54,10 @@ __RCSID("$NetBSD: tee.c,v 1.12 2016/09/05 00:40:30 sevan Exp $");
 #include <locale.h>
 #include <err.h>
 
+#ifndef DEFFILEMODE
+#define DEFFILEMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
+#endif
+
 typedef struct _list {
 	struct _list *next;
 	int fd;

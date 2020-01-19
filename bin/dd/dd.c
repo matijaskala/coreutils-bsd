@@ -60,6 +60,10 @@ static void setup(void);
 
 #define MAXIMUM(a, b)	(((a) > (b)) ? (a) : (b))
 
+#ifndef DEFFILEMODE
+#define DEFFILEMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
+#endif
+
 IO	in, out;		/* input/output state */
 STAT	st;			/* statistics */
 void	(*cfunc)(void);		/* conversion function */
