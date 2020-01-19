@@ -34,7 +34,9 @@
 #include <sys/param.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#ifdef ENABLE_IFLAG
 #include <sys/sysctl.h>
+#endif
 //#include <sys/module.h>
 //#include <sys/linker.h>
 
