@@ -57,8 +57,7 @@ __RCSID("$NetBSD: kill.c,v 1.30 2018/12/12 20:22:43 kre Exp $");
 #include <locale.h>
 #include <sys/ioctl.h>
 
-extern const char *const sys_sigabbrev[];
-void sys_sigabbrev_init();
+#include "signalnamestr.h"
 
 #ifdef SHELL            /* sh (aka ash) builtin */
 int killcmd(int, char *argv[]);
@@ -80,7 +79,6 @@ main(int argc, char *argv[])
 	pid_t pid;
 	const char *sn;
 
-	sys_sigabbrev_init();
 	setprogname(argv[0]);
 	setlocale(LC_ALL, "");
 	if (argc < 2)
@@ -112,7 +110,7 @@ main(int argc, char *argv[])
 					numsig -= 128;
 				if (numsig == 0 || numsig >= NSIG)
 					nosig(sn);
-				sn = sys_sigabbrev[numsig];
+				sn = signalnamestr(numsig);
 				if (sn == NULL)
 					errx(EXIT_FAILURE,
 					   "unknown signal number: %d", numsig);
@@ -136,7 +134,7 @@ main(int argc, char *argv[])
 			}
 			if (strcmp(sn, "0") == 0)
 				numsig = 0;
-			else if (strcmp(sn, sys_sigabbrev[0]) == 0) {
+			else if (strcmp(sn, signalnamestr(0)) == 0) {
 				numsig = 0;
 				if (sn != argv[0])
 					goto trysignal;
@@ -158,7 +156,7 @@ main(int argc, char *argv[])
 		default:
  trysignal:
 			sn = *argv + 1;
-			if (strcmp(sn, sys_sigabbrev[0]) == 0) {
+			if (strcmp(sn, signalnamestr(0)) == 0) {
 				numsig = 0;
 				if (isdigit((unsigned char)*sn))
 					numsig = signum(sn);
@@ -286,7 +284,7 @@ printsignals(FILE *fp, int len)
 	pad = (len | 7) + 1 - len;
 
 	for (sig = 1; sig < NSIG; sig++) {
-		name = sys_sigabbrev[sig];
+		name = signalnamestr(sig);
 		if (name == NULL)
 			continue;
 

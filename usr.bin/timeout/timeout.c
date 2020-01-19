@@ -51,10 +51,9 @@ __RCSID("$NetBSD: timeout.c,v 1.4 2014/08/05 08:20:02 christos Exp $");
 #include <sysexits.h>
 #include <unistd.h>
 
-#define EXIT_TIMEOUT 124
+#include "signalnamestr.h"
 
-extern const char *const sys_sigabbrev[];
-void sys_sigabbrev_init();
+#define EXIT_TIMEOUT 124
 
 static sig_atomic_t sig_chld = 0;
 static sig_atomic_t sig_term = 0;
@@ -121,7 +120,7 @@ parse_signal(const char *str)
 		str += 3;
 
 		for (i = 1; i < NSIG; i++) {
-			if (strcasecmp(str, sys_sigabbrev[i]) == 0)
+			if (strcasecmp(str, signalnamestr(i)) == 0)
 				return (i);
 		}
 
@@ -207,7 +206,6 @@ main(int argc, char **argv)
 		SIGQUIT,
 	};
 
-	sys_sigabbrev_init();
 	setprogname(argv[0]);
 
 	foreground = preserve = 0;
