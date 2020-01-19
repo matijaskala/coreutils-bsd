@@ -60,6 +60,39 @@ __FBSDID("$FreeBSD$");
 nl_catd catalog;
 #endif
 
+#ifdef __UCLIBC__
+#include <pthread.h>
+#include <sys/random.h>
+
+static int getentropy(void *buffer, size_t len)
+{
+	int cs, ret;
+	char *pos = buffer;
+
+	if (len > 256) {
+		errno = EIO;
+		return -1;
+	}
+
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
+
+	while (len) {
+		ret = getrandom(pos, len, 0);
+		if (ret < 0) {
+			if (errno == EINTR) continue;
+			else break;
+		}
+		pos += ret;
+		len -= ret;
+		ret = 0;
+	}
+
+	pthread_setcancelstate(cs, 0);
+
+	return ret;
+}
+#endif
+
 #define	OPTIONS	"bcCdfghik:Mmno:RrsS:t:T:uVz"
 
 static bool need_random;
