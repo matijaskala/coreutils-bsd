@@ -5,137 +5,135 @@ static const char* signalnamestr(int sig) {
     extern const char *const sys_sigabbrev[];
     return sys_sigabbrev[sig];
 #else
-    switch (sig) {
 #ifdef SIGHUP
-    case SIGHUP: return "HUP";
+    if (sig == SIGHUP) return "HUP";
 #endif
 #ifdef SIGINT
-    case SIGINT: return "INT";
+    if (sig == SIGINT) return "INT";
 #endif
 #ifdef SIGQUIT
-    case SIGQUIT: return "QUIT";
+    if (sig == SIGQUIT) return "QUIT";
 #endif
 #ifdef SIGILL
-    case SIGILL: return "ILL";
+    if (sig == SIGILL) return "ILL";
 #endif
 #ifdef SIGTRAP
-    case SIGTRAP: return "TRAP";
+    if (sig == SIGTRAP) return "TRAP";
 #endif
 #ifdef SIGABRT
-    case SIGABRT: return "ABRT";
+    if (sig == SIGABRT) return "ABRT";
 #endif
 #ifdef SIGIOT
-    case SIGIOT: return "IOT";
+    if (sig == SIGIOT) return "IOT";
 #endif
 #ifdef SIGEMT
-    case SIGEMT: return "EMT";
+    if (sig == SIGEMT) return "EMT";
 #endif
 #ifdef SIGFPE
-    case SIGFPE: return "FPE";
+    if (sig == SIGFPE) return "FPE";
 #endif
 #ifdef SIGKILL
-    case SIGKILL: return "KILL";
+    if (sig == SIGKILL) return "KILL";
 #endif
 #ifdef SIGUNUSED
-    case SIGUNUSED: return "UNUSED";
+    if (sig == SIGUNUSED) return "UNUSED";
 #endif
 #ifdef SIGBUS
-    case SIGBUS: return "BUS";
+    if (sig == SIGBUS) return "BUS";
 #endif
 #ifdef SIGSEGV
-    case SIGSEGV: return "SEGV";
+    if (sig == SIGSEGV) return "SEGV";
 #endif
 #ifdef SIGSYS
-    case SIGSYS: return "SYS";
+    if (sig == SIGSYS) return "SYS";
 #endif
 #ifdef SIGPIPE
-    case SIGPIPE: return "PIPE";
+    if (sig == SIGPIPE) return "PIPE";
 #endif
 #ifdef SIGALRM
-    case SIGALRM: return "ALRM";
+    if (sig == SIGALRM) return "ALRM";
 #endif
 #ifdef SIGTERM
-    case SIGTERM: return "TERM";
+    if (sig == SIGTERM) return "TERM";
 #endif
 #ifdef SIGSTKFLT
-    case SIGSTKFLT: return "STKFLT";
+    if (sig == SIGSTKFLT) return "STKFLT";
 #endif
 #ifdef SIGIO
-    case SIGIO: return "IO";
+    if (sig == SIGIO) return "IO";
 #endif
 #ifdef SIGXCPU
-    case SIGXCPU: return "XCPU";
+    if (sig == SIGXCPU) return "XCPU";
 #endif
 #ifdef SIGXFSZ
-    case SIGXFSZ: return "XFSZ";
+    if (sig == SIGXFSZ) return "XFSZ";
 #endif
 #ifdef SIGVTALRM
-    case SIGVTALRM: return "VTALRM";
+    if (sig == SIGVTALRM) return "VTALRM";
 #endif
 #ifdef SIGPROF
-    case SIGPROF: return "PROF";
+    if (sig == SIGPROF) return "PROF";
 #endif
 #ifdef SIGWINCH
-    case SIGWINCH: return "WINCH";
+    if (sig == SIGWINCH) return "WINCH";
 #endif
 #ifdef SIGLOST
-    case SIGLOST: return "LOST";
+    if (sig == SIGLOST) return "LOST";
 #endif
 #ifdef SIGUSR1
-    case SIGUSR1: return "USR1";
+    if (sig == SIGUSR1) return "USR1";
 #endif
 #ifdef SIGUSR2
-    case SIGUSR2: return "USR2";
+    if (sig == SIGUSR2) return "USR2";
 #endif
 #ifdef SIGPWR
-    case SIGPWR: return "PWR";
+    if (sig == SIGPWR) return "PWR";
 #endif
 #ifdef SIGPOLL
-    case SIGPOLL: return "POLL";
+    if (sig == SIGPOLL) return "POLL";
 #endif
 #ifdef SIGSTOP
-    case SIGSTOP: return "STOP";
+    if (sig == SIGSTOP) return "STOP";
 #endif
 #ifdef SIGTSTP
-    case SIGTSTP: return "TSTP";
+    if (sig == SIGTSTP) return "TSTP";
 #endif
 #ifdef SIGCONT
-    case SIGCONT: return "CONT";
+    if (sig == SIGCONT) return "CONT";
 #endif
 #ifdef SIGCHLD
-    case SIGCHLD: return "CHLD";
+    if (sig == SIGCHLD) return "CHLD";
 #endif
 #ifdef SIGCLD
-    case SIGCLD: return "CLD";
+    if (sig == SIGCLD) return "CLD";
 #endif
 #ifdef SIGTTIN
-    case SIGTTIN: return "TTIN";
+    if (sig == SIGTTIN) return "TTIN";
 #endif
 #ifdef SIGTTOU
-    case SIGTTOU: return "TTOU";
+    if (sig == SIGTTOU) return "TTOU";
 #endif
 #ifdef SIGINFO
-    case SIGINFO: return "INFO";
+    if (sig == SIGINFO) return "INFO";
 #endif
 #ifdef SIGURG
-    case SIGURG: return "URG";
+    if (sig == SIGURG) return "URG";
 #endif
 #ifdef SIGWAITING
-    case SIGWAITING: return "WAITING";
+    if (sig == SIGWAITING) return "WAITING";
 #endif
 #ifdef SIGLWP
-    case SIGLWP: return "LWP";
+    if (sig == SIGLWP) return "LWP";
 #endif
 #ifdef SIGFREEZE
-    case SIGFREEZE: return "FREEZE";
+    if (sig == SIGFREEZE) return "FREEZE";
 #endif
 #ifdef SIGTHAW
-    case SIGTHAW: return "THAW";
+    if (sig == SIGTHAW) return "THAW";
 #endif
 #ifdef SIGCANCEL
-    case SIGCANCEL: return "CANCEL";
+    if (sig == SIGCANCEL) return "CANCEL";
 #endif
-    }
     return "Signal 0";
 #endif
 }
