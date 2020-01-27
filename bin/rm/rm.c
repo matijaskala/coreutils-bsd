@@ -486,26 +486,37 @@ check(const char *path, const char *name, struct stat *sp)
 	fflush(stderr);
 
 	for (;;) {
+		char *answer = NULL;
+		size_t n = 0;
 		size_t len;
-		char *answer;
 
-		answer = fgetln(stdin, &len);
+		len = getline(&answer, &n, stdin);
 		/* clearerr(stdin); */
-		if (answer == NULL)
+		if (len == -1) {
+			free(answer);
 			return (0);
+		}
 		if (answer[len - 1] == '\n')
 			len--;
-		if (len == 0)
+		if (len == 0) {
+			free(answer);
 			continue;
+		}
 
 		for (choice = choices; choice->str != NULL; choice++) {
-			if (len == 1 && choice->ch == answer[0])
+			if (len == 1 && choice->ch == answer[0]) {
+				free(answer);
 				goto valid_choice;
-			if (strncasecmp(answer, choice->str, len) == 0)
+			}
+			if (strncasecmp(answer, choice->str, len) == 0) {
+				free(answer);
 				goto valid_choice;
+			}
 		}
 
 		fprintf(stderr, "invalid answer, try again (y/n/a/v): ");
+
+		free(answer);
 	}
 
 valid_choice:

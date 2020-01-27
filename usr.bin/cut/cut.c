@@ -277,14 +277,15 @@ b_cut(FILE *fp, const char *fname)
 static int
 b_n_cut(FILE *fp, const char *fname)
 {
-	size_t col, i, lbuflen;
+	size_t col, i, lbuflen, n = 0;
 	char *lbuf;
 	int canwrite, clen, warned;
 	mbstate_t mbs;
 
 	memset(&mbs, 0, sizeof(mbs));
+	lbuf = NULL;
 	warned = 0;
-	while ((lbuf = fgetln(fp, &lbuflen)) != NULL) {
+	while ((lbuflen = getline(&lbuf, &n, fp)) != -1) {
 		for (col = 0; lbuflen > 0; col += clen) {
 			if ((clen = mbrlen(lbuf, lbuflen, &mbs)) < 0) {
 				if (!warned) {
@@ -333,6 +334,7 @@ b_n_cut(FILE *fp, const char *fname)
 		if (lbuflen > 0)
 			putchar('\n');
 	}
+	free(lbuf);
 	return (warned);
 }
 
@@ -392,10 +394,11 @@ f_cut(FILE *fp, const char *fname)
 	char *pos, *p;
 	int output;
 	char *lbuf, *mlbuf;
-	size_t clen, lbuflen, reallen;
+	size_t clen, lbuflen, reallen, n = 0;
 
+	lbuf = NULL;
 	mlbuf = NULL;
-	while ((lbuf = fgetln(fp, &lbuflen)) != NULL) {
+	while ((lbuflen = getline(&lbuf, &n, fp)) != -1) {
 		reallen = lbuflen;
 		/* Assert EOL has a newline. */
 		if (*(lbuf + lbuflen - 1) != '\n') {
@@ -414,6 +417,7 @@ f_cut(FILE *fp, const char *fname)
 			if (clen == (size_t)-1 || clen == (size_t)-2) {
 				warnc(EILSEQ, "%s", fname);
 				free(mlbuf);
+				free(lbuf);
 				return (1);
 			}
 			if (clen == 0)
@@ -441,6 +445,7 @@ f_cut(FILE *fp, const char *fname)
 				if (clen == (size_t)-1 || clen == (size_t)-2) {
 					warnc(EILSEQ, "%s", fname);
 					free(mlbuf);
+					free(lbuf);
 					return (1);
 				}
 				if (clen == 0)
@@ -473,6 +478,7 @@ f_cut(FILE *fp, const char *fname)
 		(void)putchar('\n');
 	}
 	free(mlbuf);
+	free(lbuf);
 	return (0);
 }
 
