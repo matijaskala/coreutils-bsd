@@ -54,6 +54,10 @@ int gid_from_group(const char *name, gid_t *gid);
 
 #include "pathnames.h"
 
+#ifndef S_BLKSIZE
+#define S_BLKSIZE 512
+#endif
+
 #define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
 
 #define	DIRECTORY	0x01		/* Tell install it's a directory. */

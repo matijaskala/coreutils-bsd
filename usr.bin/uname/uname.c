@@ -45,7 +45,6 @@ __RCSID("$NetBSD: uname.c,v 1.11 2011/09/06 18:35:13 joerg Exp $");
 #include <unistd.h>
 #include <err.h>
 
-#include <sys/sysctl.h>
 #include <sys/utsname.h>
 
 static void usage(void);
@@ -64,7 +63,7 @@ int
 main(int argc, char **argv)
 {
 	struct utsname u;
-	char machine_arch[SYS_NMLN];
+	char machine_arch[sizeof(u.machine)];
 	int c;
 	int space = 0;
 	int print_mask = 0;

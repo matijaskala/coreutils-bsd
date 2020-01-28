@@ -1569,7 +1569,7 @@ mt_sort(struct sort_list *list,
 				if (res >= 0)
 					break;
 				if (errno == EAGAIN) {
-					pthread_yield();
+					sched_yield();
 					continue;
 				}
 				err(2, NULL);

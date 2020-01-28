@@ -495,20 +495,24 @@ bwsfgetln(FILE *f, size_t *len, bool zero_ended, struct reader_buffer *rb)
 		return (bwssbdup(ret, *len));
 
 	} else if (!zero_ended && (MB_CUR_MAX == 1)) {
-		char *ret;
+		char *tmp = NULL;
+		size_t n = 0;
 
-		ret = fgetln(f, len);
+		*len = getline(&tmp, &n, f);
 
-		if (ret == NULL) {
+		if (*len == -1) {
+			free(tmp);
 			if (!feof(f))
 				err(2, NULL);
 			return (NULL);
 		}
 		if (*len > 0) {
-			if (ret[*len - 1] == '\n')
+			if (tmp[*len - 1] == '\n')
 				--(*len);
 		}
-		return (bwscsbdup((unsigned char*)ret, *len));
+		struct bwstring *ret = bwscsbdup((unsigned char*)tmp, *len);
+		free(tmp);
+		return ret;
 
 	} else {
 		*len = 0;

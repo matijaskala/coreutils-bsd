@@ -626,7 +626,7 @@ run_top_sort_level(struct sort_level *sl)
 				if (res >= 0)
 					break;
 				if (errno == EAGAIN) {
-					pthread_yield();
+					sched_yield();
 					continue;
 				}
 				err(2, NULL);
@@ -655,7 +655,7 @@ run_sort(struct sort_list_item **base, size_t nmemb)
 		pthread_mutexattr_t mattr;
 
 		pthread_mutexattr_init(&mattr);
-		pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ADAPTIVE_NP);
+		pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ERRORCHECK);
 
 		pthread_mutex_init(&g_ls_mutex, &mattr);
 		pthread_cond_init(&g_ls_cond, NULL);

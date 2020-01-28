@@ -35,6 +35,7 @@ __RCSID("$NetBSD: utmpentry.c,v 1.18 2015/11/21 15:01:43 christos Exp $");
 #endif
 
 #include <sys/stat.h>
+#include <sys/time.h>
 
 #include <time.h>
 #include <string.h>
