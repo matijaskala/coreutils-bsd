@@ -120,7 +120,7 @@ main(int argc, char *argv[])
 				 * an assumed initial mode of a=rw.
 				 */
 				mode = getmode(set, (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
-				if ((mode & ACCESSPERMS) != mode)
+				if ((mode & (S_IRWXU|S_IRWXG|S_IRWXO)) != mode)
 					errx(1, "forbidden mode: %o", mode);
 				mflag = 1;
 				free(set);

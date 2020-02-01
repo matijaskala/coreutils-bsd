@@ -299,7 +299,7 @@ err:		if (unlink(to))
 		return (1);
 	}
 
-	oldmode = sbp->st_mode & ALLPERMS;
+	oldmode = sbp->st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
 	if (fchown(to_fd, sbp->st_uid, sbp->st_gid)) {
 		warn("%s: set owner/group (was: %lu/%lu)", to,
 		    (u_long)sbp->st_uid, (u_long)sbp->st_gid);
