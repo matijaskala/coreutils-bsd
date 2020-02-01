@@ -36,6 +36,7 @@ typedef	dev_t pack_t(int, u_long [], const char **);
 
 pack_t	*pack_find(const char *);
 pack_t	 pack_native;
+pack_t	 pack_bsdos;
 
 #define	major_netbsd(x)		((int32_t)((((x) & 0x000fff00) >>  8)))
 #define	minor_netbsd(x)		((int32_t)((((x) & 0xfff00000) >> 12) | \

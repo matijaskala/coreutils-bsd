@@ -1,4 +1,5 @@
-.\"	$NetBSD: mkfifo.1,v 1.13 2017/07/04 07:03:32 wiz Exp $
+.\"	$OpenBSD: mkfifo.1,v 1.13 2010/09/03 10:08:22 jmc Exp $
+.\"	$NetBSD: mkfifo.1,v 1.4 1994/12/23 07:16:54 jtc Exp $
 .\"
 .\" Copyright (c) 1990, 1993
 .\"	The Regents of the University of California.  All rights reserved.
@@ -32,43 +33,41 @@
 .\"
 .\"     @(#)mkfifo.1	8.2 (Berkeley) 1/5/94
 .\"
-.Dd January 5, 1994
+.Dd $Mdocdate: September 3 2010 $
 .Dt MKFIFO 1
 .Os
 .Sh NAME
 .Nm mkfifo
-.Nd make fifos
+.Nd make FIFOs
 .Sh SYNOPSIS
-.Nm
+.Nm mkfifo
 .Op Fl m Ar mode
-.Ar fifo_name  ...
+.Ar fifo_name ...
 .Sh DESCRIPTION
-.Nm
-creates the fifos requested, in the order specified,
-using mode
-.Li \&0666
+.Nm mkfifo
+creates the FIFOs requested, in the order specified,
+using mode 0666
 modified by the current
 .Xr umask 2 .
+It requires write permission in the parent directory.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
-.It Fl m
-Set the file permission bits of newly-created fifos to
+.It Fl m Ar mode
+Set the file permission bits of newly created FIFOs to
 .Ar mode .
-The mode is specified as in
-.Xr chmod 1 .
-In symbolic mode strings, the
-.Dq +
+The mode argument can be in any of the formats specified to the
+.Xr chmod 1
+utility.
+If a symbolic mode is specified, the operators
+.Ql +
 and
-.Dq -
-operators are interpreted relative to an assumed initial mode of
-.Dq a=rw
+.Ql -
+are interpreted relative to an initial mode of
+.Dq a=rw .
 .El
-.Pp
-.Nm
-requires write permission in the parent directory.
 .Sh EXIT STATUS
-.Ex -std
+.Ex -std mkfifo
 .Sh SEE ALSO
 .Xr mkdir 1 ,
 .Xr rm 1 ,
@@ -77,10 +76,11 @@ requires write permission in the parent directory.
 .Sh STANDARDS
 The
 .Nm
-utility is expected to be
-.St -p1003.2-92
-compliant.
+utility is compliant with the
+.St -p1003.1-2008
+specification.
 .Sh HISTORY
+The
 .Nm
 command appeared in
 .Bx 4.4 .

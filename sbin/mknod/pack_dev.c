@@ -56,7 +56,6 @@ static	pack_t	pack_8_8;
 static	pack_t	pack_12_20;
 static	pack_t	pack_14_18;
 static	pack_t	pack_8_24;
-static	pack_t	pack_bsdos;
 static	int	compare_format(const void *, const void *);
 
 static const char iMajorError[] = "invalid major number";
@@ -215,7 +214,8 @@ pack_8_24(int n, u_long numbers[], const char **error)
 					 (((y) <<  8) & 0x000fff00) | \
 					 (((z) <<  0) & 0x000000ff)))
 
-static dev_t
+	/* exported */
+dev_t
 pack_bsdos(int n, u_long numbers[], const char **error)
 {
 	dev_t dev = 0;
