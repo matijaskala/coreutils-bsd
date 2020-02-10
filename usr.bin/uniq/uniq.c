@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1989, 1993
- *	The Regents of the University of California.  All rights reserved.
+ *      The Regents of the University of California.  All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
  * Case Larsen.
@@ -30,13 +30,14 @@
  * SUCH DAMAGE.
  *
  * @(#) Copyright (c) 1989, 1993 The Regents of the University of California.  All rights reserved.
- * @(#)uniq.c	8.3 (Berkeley) 5/4/95
+ * @(#)uniq.c   8.3 (Berkeley) 5/4/95
  * $FreeBSD: head/usr.bin/uniq/uniq.c 303526 2016-07-30 01:07:47Z bapt $
  */
 
 #include <ctype.h>
 #include <err.h>
 #include <errno.h>
+#include <getopt.h>
 #include <limits.h>
 #include <locale.h>
 #include <nl_types.h>
@@ -49,8 +50,26 @@
 #include <wchar.h>
 #include <wctype.h>
 
-static int cflag, dflag, uflag, iflag;
+static int Dflag, cflag, dflag, uflag, iflag;
 static int numchars, numfields, repeats;
+
+/* Dflag values */
+#define	DF_NONE		0
+#define	DF_NOSEP	1
+#define	DF_PRESEP	2
+#define	DF_POSTSEP	3
+
+static const struct option long_opts[] =
+{
+	{"all-repeated",optional_argument,	NULL, 'D'},
+	{"count",	no_argument,		NULL, 'c'},
+	{"repeated",	no_argument,		NULL, 'd'},
+	{"skip-fields",	required_argument,	NULL, 'f'},
+	{"ignore-case",	no_argument,		NULL, 'i'},
+	{"skip-chars",	required_argument,	NULL, 's'},
+	{"unique",	no_argument,		NULL, 'u'},
+	{NULL,		no_argument,		NULL, 0}
+};
 
 static FILE	*file(const char *, const char *);
 static wchar_t	*convert(const char *);
@@ -61,7 +80,7 @@ static void	 obsolete(char *[]);
 static void	 usage(void);
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
 	wchar_t *tprev, *tthis;
 	FILE *ifp, *ofp;
@@ -73,8 +92,19 @@ main(int argc, char *argv[])
 	(void) setlocale(LC_ALL, "");
 
 	obsolete(argv);
-	while ((ch = getopt(argc, argv, "cdif:s:u")) != -1)
+	while ((ch = getopt_long(argc, argv, "+D::cdif:s:u", long_opts,
+	    NULL)) != -1)
 		switch (ch) {
+		case 'D':
+			if (optarg == NULL || strcasecmp(optarg, "none") == 0)
+				Dflag = DF_NOSEP;
+			else if (strcasecmp(optarg, "prepend") == 0)
+				Dflag = DF_PRESEP;
+			else if (strcasecmp(optarg, "separate") == 0)
+				Dflag = DF_POSTSEP;
+			else
+				usage();
+			break;
 		case 'c':
 			cflag = 1;
 			break;
@@ -151,8 +181,12 @@ main(int argc, char *argv[])
 
 		if (comp) {
 			/* If different, print; set previous to new value. */
-			if (cflag || !dflag || !uflag)
+			if (cflag || !dflag || !uflag) {
+			if (Dflag == DF_POSTSEP && repeats > 0)
+				fputc('\n', ofp);
+			if (!Dflag)
 				show(ofp, prevline);
+			}
 			p = prevline;
 			b1 = prevbuflen;
 			prevline = thisline;
@@ -166,12 +200,21 @@ main(int argc, char *argv[])
 			thisbuflen = b1;
 			tthis = NULL;
 			repeats = 0;
-		} else
+		} else {
+			if (Dflag) {
+				if (repeats == 0) {
+					if (Dflag == DF_PRESEP)
+						fputc('\n', ofp);
+					show(ofp, prevline);
+				}
+				show(ofp, thisline);
+			}
 			++repeats;
+		}
 	}
 	if (ferror(ifp))
 		err(1, "%s", ifn);
-	if (cflag || !dflag || !uflag)
+	if (!Dflag)
 		show(ofp, prevline);
 	exit(0);
 }
@@ -237,9 +280,11 @@ static void
 show(FILE *ofp, const char *str)
 {
 
+	if ((!Dflag && dflag && repeats == 0) || (uflag && repeats > 0))
+		return;
 	if (cflag)
 		(void)fprintf(ofp, "%4d %s", repeats + 1, str);
-	if ((dflag && repeats) || (uflag && !repeats))
+	else
 		(void)fprintf(ofp, "%s", str);
 }
 
@@ -302,6 +347,6 @@ static void
 usage(void)
 {
 	(void)fprintf(stderr,
-"usage: uniq [-c | -d | -u] [-i] [-f fields] [-s chars] [input [output]]\n");
+"usage: uniq [-c | -d | -D | -u] [-i] [-f fields] [-s chars] [input [output]]\n");
 	exit(1);
 }
