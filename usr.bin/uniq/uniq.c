@@ -1,6 +1,8 @@
-/*
+/*-
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Copyright (c) 1989, 1993
- *      The Regents of the University of California.  All rights reserved.
+ *	The Regents of the University of California.  All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
  * Case Larsen.
@@ -28,10 +30,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * @(#) Copyright (c) 1989, 1993 The Regents of the University of California.  All rights reserved.
- * @(#)uniq.c   8.3 (Berkeley) 5/4/95
- * $FreeBSD: head/usr.bin/uniq/uniq.c 303526 2016-07-30 01:07:47Z bapt $
  */
 
 #include <ctype.h>
@@ -135,13 +133,6 @@ main (int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	/* If no flags are set, default is -d -u. */
-	if (cflag) {
-		if (dflag || uflag)
-			usage();
-	} else if (!dflag && !uflag)
-		dflag = uflag = 1;
-
 	if (argc > 2)
 		usage();
 
@@ -163,9 +154,6 @@ main (int argc, char *argv[])
 	}
 	tprev = convert(prevline);
 
-	if (!cflag && uflag && dflag)
-		show(ofp, prevline);
-
 	tthis = NULL;
 	while (getline(&thisline, &thisbuflen, ifp) >= 0) {
 		if (tthis != NULL)
@@ -181,12 +169,10 @@ main (int argc, char *argv[])
 
 		if (comp) {
 			/* If different, print; set previous to new value. */
-			if (cflag || !dflag || !uflag) {
 			if (Dflag == DF_POSTSEP && repeats > 0)
 				fputc('\n', ofp);
 			if (!Dflag)
 				show(ofp, prevline);
-			}
 			p = prevline;
 			b1 = prevbuflen;
 			prevline = thisline;
@@ -194,8 +180,6 @@ main (int argc, char *argv[])
 			if (tprev != NULL)
 				free(tprev);
 			tprev = tthis;
-			if (!cflag && uflag && dflag)
-				show(ofp, prevline);
 			thisline = p;
 			thisbuflen = b1;
 			tthis = NULL;
