@@ -67,6 +67,7 @@ __FBSDID("$FreeBSD$");
 #include <err.h>
 #include <errno.h>
 #include <fts.h>
+#include <getopt.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdio.h>
@@ -86,12 +87,21 @@ static char emptystring[] = "";
 PATH_T to = { to.p_path, emptystring, "" };
 
 int fflag, iflag, lflag, nflag, pflag, sflag, vflag;
+int copy_with_parents;
 static int Rflag, dflag, rflag;
 volatile sig_atomic_t info;
 
 enum op { FILE_TO_FILE, FILE_TO_DIR, DIR_TO_DNE };
 
 static int copy(char *[], enum op, int);
+
+#define PARENTS_OPT       (CHAR_MAX + 1)
+
+static const struct option long_opts[] =
+{
+        {"parents",     optional_argument,      NULL, PARENTS_OPT},
+        {NULL,          no_argument,            NULL, 0}
+};
 
 int
 main(int argc, char *argv[])
@@ -102,8 +112,8 @@ main(int argc, char *argv[])
 	char *target;
 
 	fts_options = FTS_NOCHDIR | FTS_PHYSICAL;
-	Hflag = Lflag = 0;
-	while ((ch = getopt(argc, argv, "HLPRadfilnprsvx")) != -1)
+	Hflag = Lflag = copy_with_parents = 0;
+	while ((ch = getopt_long(argc, argv, "HLPRadfilnprsvx", long_opts, NULL)) != -1)
 		switch (ch) {
 		case 'H':
 			Hflag = 1;
@@ -157,6 +167,9 @@ main(int argc, char *argv[])
 			break;
 		case 'x':
 			fts_options |= FTS_XDEV;
+			break;
+		case PARENTS_OPT:
+			copy_with_parents = 1;
 			break;
 		default:
 			usage();
@@ -343,14 +356,35 @@ copy(char *argv[], enum op type, int fts_options)
 			if (*p != '/' && target_mid[-1] != '/')
 				*target_mid++ = '/';
 			*target_mid = 0;
-			if (target_mid - to.p_path + nlen >= PATH_MAX) {
-				warnx("%s%s: name too long (not copied)",
-				    to.p_path, p);
-				badcp = rval = 1;
-				continue;
+			if (copy_with_parents) {
+				if (target_mid - to.p_path + curr->fts_pathlen >= PATH_MAX) {
+					warnx("%s%s: name too long (not copied)",
+					    to.p_path, p);
+					badcp = rval = 1;
+					continue;
+				}
+				for (char *i = curr->fts_path, *j = NULL; i; i = j) {
+					j = strchr(i+1, '/');
+					if (j) {
+						strncat(target_mid, i, j - i);
+						mkdir(to.p_path, 0755);
+					}
+					else {
+						strcat(target_mid, i);
+						to.p_end = target_mid + (i - curr->fts_path) + strlen(i);
+					}
+				}
 			}
-			(void)strncat(target_mid, p, nlen);
-			to.p_end = target_mid + nlen;
+			else {
+				if (target_mid - to.p_path + nlen >= PATH_MAX) {
+					warnx("%s%s: name too long (not copied)",
+					    to.p_path, p);
+					badcp = rval = 1;
+					continue;
+				}
+				(void)strncat(target_mid, p, nlen);
+				to.p_end = target_mid + nlen;
+			}
 			*to.p_end = 0;
 			STRIP_TRAILING_SLASH(to);
 		}

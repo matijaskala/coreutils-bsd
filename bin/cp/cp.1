@@ -54,6 +54,7 @@
 .Oc
 .Op Fl f | i | n
 .Op Fl alpsvx
+.Op Fl -parents
 .Ar source_file ... target_directory
 .Sh DESCRIPTION
 In the first synopsis form, the
@@ -187,6 +188,8 @@ Cause
 to be verbose, showing files as they are copied.
 .It Fl x
 File system mount points are not traversed.
+.It Fl -parents
+Use full source file name under target directory.
 .El
 .Pp
 For each destination file that already exists, its contents are
