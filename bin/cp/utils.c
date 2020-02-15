@@ -38,7 +38,6 @@ static char sccsid[] = "@(#)utils.c	8.3 (Berkeley) 4/1/94";
 __FBSDID("$FreeBSD$");
 
 #include <sys/types.h>
-#include <sys/acl.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #ifdef VM_AND_BUFFER_CACHE_SYNCHRONIZED
