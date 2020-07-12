@@ -640,8 +640,10 @@ traverse(int argc, char *argv[], int options)
 			break;
 		case FTS_D:
 			if (p->fts_level != FTS_ROOTLEVEL &&
-			    p->fts_name[0] == '.' && !f_listdot)
+			    p->fts_name[0] == '.' && !f_listdot) {
+				(void)fts_set(ftsp, p, FTS_SKIP);
 				break;
+			}
 
 			/*
 			 * If already output something, put out a newline as
