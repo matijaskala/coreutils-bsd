@@ -530,7 +530,11 @@ strip(char *to_name)
 	char * volatile path_strip;
 	pid_t pid;
 
+#if defined __GLIBC__ && !defined __UCLIBC__
 	if ((path_strip = secure_getenv("STRIP")) == NULL)
+#else
+	if ((path_strip = (issetugid() ? NULL : getenv("STRIP"))) == NULL)
+#endif
 		path_strip = _PATH_STRIP;
 
 	switch ((pid = vfork())) {
