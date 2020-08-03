@@ -654,7 +654,7 @@ traverse(int argc, char *argv[], int options)
 				putchar('\n');
 				(void)printname(p->fts_path);
 				puts(":");
-			} else if (argc > 1) {
+			} else if (f_recursive || argc > 1) {
 				(void)printname(p->fts_path);
 				puts(":");
 				output = 1;

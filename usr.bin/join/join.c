@@ -321,24 +321,13 @@ slurp(INPUT *F)
 			F->pushbool = 0;
 			continue;
 		}
-		if ((len = getline(&bp, &n, F->fp)) == -1) {
-			free(bp);
+		if ((len = getline(&(lp->line), &(lp->linealloc), F->fp)) == -1) {
 			return;
 		}
-		if (lp->linealloc <= len + 1) {
-			lp->linealloc += MAX(100, len + 1 - lp->linealloc);
-			if ((lp->line =
-			    realloc(lp->line, lp->linealloc)) == NULL)
-				err(1, NULL);
-		}
-		memmove(lp->line, bp, len);
-		free(bp);
 
 		/* Replace trailing newline, if it exists. */
-		if (bp[len - 1] == '\n')
+		if (lp->line[len - 1] == '\n')
 			lp->line[len - 1] = '\0';
-		else
-			lp->line[len] = '\0';
 		bp = lp->line;
 
 		/* Split the line into fields, allocate space as necessary. */
