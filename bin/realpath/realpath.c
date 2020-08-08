@@ -35,11 +35,61 @@ __FBSDID("$FreeBSD$");
 #include <sys/param.h>
 
 #include <err.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 static void usage(void) __dead2;
+
+static char *strippath(char *path) {
+	size_t bufl = 32;
+	char *buf = NULL, *t;
+	while (*path != '/') {
+		buf = realloc(buf, bufl);
+		if (!buf)
+			err(1, NULL);
+		errno = 0;
+		if (getcwd(buf, bufl)) {
+			t = strrchr(buf, '/');
+			while (t >= buf && !strcmp(t, "/"))
+				*t-- = 0;
+			break;
+		}
+		if (errno != ERANGE)
+			err(1, NULL);
+		bufl *= 2;
+	}
+	if (!buf) {
+		buf = malloc(bufl);
+		if (!buf)
+			err(1, NULL);
+		*buf = 0;
+	}
+	t = strtok(path, "/");
+	do {
+		if (!strcmp(t, "."))
+			continue;
+		if (!strcmp(t, "..")) {
+			t = strrchr(buf, '/');
+			while (t && *t == '/')
+				*t-- = 0;
+		}
+		else {
+			while (bufl < strlen(buf) + 1 + strlen(t) + 1) {
+				buf = realloc(buf, bufl *= 2);
+				if (!buf)
+					err(1, NULL);
+			}
+			sprintf(buf + strlen(buf), "/%s", t);
+		}
+	} while (t = strtok(NULL, "/"));
+	if (!*buf)
+		strcpy(buf, "/");
+	free(path);
+	return buf;
+}
 
 int
 main(int argc, char *argv[])
@@ -47,13 +97,16 @@ main(int argc, char *argv[])
 	char buf[PATH_MAX];
 	char *p;
 	const char *path;
-	int ch, qflag, rval;
+	int ch, qflag, sflag, rval;
 
 	qflag = 0;
-	while ((ch = getopt(argc, argv, "q")) != -1) {
+	while ((ch = getopt(argc, argv, "qs")) != -1) {
 		switch (ch) {
 		case 'q':
 			qflag = 1;
+			break;
+		case 's':
+			sflag = 1;
 			break;
 		case '?':
 		default:
@@ -65,7 +118,12 @@ main(int argc, char *argv[])
 	path = *argv != NULL ? *argv++ : ".";
 	rval  = 0;
 	do {
-		if ((p = realpath(path, buf)) == NULL) {
+		if (sflag) {
+			p = strippath(strdup(path));
+			(void)printf("%s\n", p);
+			free(p);
+		}
+		else if ((p = realpath(path, buf)) == NULL) {
 			if (!qflag)
 				warn("%s", path);
 			rval = 1;
@@ -79,6 +137,6 @@ static void
 usage(void)
 {
 
-	(void)fprintf(stderr, "usage: realpath [-q] [path ...]\n");
+	(void)fprintf(stderr, "usage: realpath [-q] [-s] [path ...]\n");
   	exit(1);
 }

@@ -42,6 +42,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl q
+.Op Fl s
 .Op Ar path ...
 .Sh DESCRIPTION
 The
@@ -67,6 +68,11 @@ If
 is specified, warnings will not be printed when
 .Xr realpath 3
 fails.
+.Pp
+If
+.Fl s
+is specified, symbolic links will not be
+resolved.
 .Sh EXIT STATUS
 .Ex -std
 .Sh SEE ALSO
