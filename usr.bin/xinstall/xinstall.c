@@ -42,6 +42,7 @@
 #include <grp.h>
 #include <paths.h>
 #include <pwd.h>
+#include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,7 +78,7 @@ void	copy(int, char *, int, char *, off_t, int);
 int	compare(int, const char *, off_t, int, const char *, off_t);
 void	install(char *, char *, u_int);
 void	install_dir(char *, int);
-void	strip(char *);
+int	strip(char *, int, char *, char **);
 void	usage(void);
 int	create_tempfile(char *, char *, size_t);
 int	file_write(int, char *, size_t, int *, int *, int);
@@ -97,17 +98,23 @@ main(int argc, char *argv[])
 	Tflag = 0;
 	while ((ch = getopt(argc, argv, "B:bCcDdF:g:m:o:pSsT")) != -1)
 		switch(ch) {
-		case 'C':
-			docompare = 1;
-			break;
 		case 'B':
 			suffix = optarg;
 			/* fall through; -B implies -b */
 		case 'b':
 			dobackup = 1;
 			break;
+		case 'C':
+			docompare = 1;
+			break;
 		case 'c':
 			/* For backwards compatibility. */
+			break;
+		case 'D':
+			dodest = 1;
+			break;
+		case 'd':
+			dodir = 1;
 			break;
 		case 'F':
 			iflags |= USEFSYNC;
@@ -132,12 +139,6 @@ main(int argc, char *argv[])
 			break;
 		case 's':
 			dostrip = 1;
-			break;
-		case 'D':
-			dodest = 1;
-			break;
-		case 'd':
-			dodir = 1;
 			break;
 		case 'T':
 			Tflag = 1;
@@ -225,7 +226,7 @@ install(char *from_name, char *to_name, u_int flags)
 {
 	struct stat from_sb, to_sb;
 	struct timespec ts[2];
-	int devnull, from_fd, to_fd, serrno, files_match = 0;
+	int devnull, from_fd, to_fd, serrno, files_match = 0, stripped = 0;
 	char *p;
 	char *target_name = tempfile;
 
@@ -270,12 +271,16 @@ install(char *from_name, char *to_name, u_int flags)
 	if (to_fd < 0)
 		err(1, "%s", tempfile);
 
-	if (!devnull)
-		copy(from_fd, from_name, to_fd, tempfile, from_sb.st_size,
-		    ((off_t)from_sb.st_blocks * S_BLKSIZE < from_sb.st_size));
+	if (!devnull) {
+		if (dostrip)
+			stripped = strip(tempfile, to_fd, from_name, NULL);
+		if (!stripped)
+			copy(from_fd, from_name, to_fd, tempfile, from_sb.st_size,
+			    ((off_t)from_sb.st_blocks * S_BLKSIZE < from_sb.st_size));
+	}
 
 	if (dostrip) {
-		strip(tempfile);
+		(void)strip(tempfile, to_fd, NULL, NULL);
 
 		/*
 		 * Re-open our fd on the target, in case we used a strip
@@ -521,39 +526,66 @@ compare(int from_fd, const char *from_name, off_t from_len, int to_fd,
 
 /*
  * strip --
- *	use strip(1) to strip the target file
+ *	Use strip(1) to strip the target file.
+ *	Just invoke strip(1) on to_name if from_name is NULL, else try
+ *	to run "strip -o to_name -- from_name" and return 0 on failure.
+ *	Return 1 on success and assign result of digest_file(to_name)
+ *	to *dresp.
  */
-void
-strip(char *to_name)
+int
+strip(char *to_name, int to_fd, char *from_name, char **dresp)
 {
-	int serrno, status;
-	char * volatile path_strip;
+	const char *path_strip;
+	char *args[6];
 	pid_t pid;
+	int error, status;
 
 #if defined __GLIBC__ && !defined __UCLIBC__
 	if ((path_strip = secure_getenv("STRIP")) == NULL)
 #else
-	if ((path_strip = (issetugid() ? NULL : getenv("STRIP"))) == NULL)
+	if (issetugid() || (path_strip = getenv("STRIP")) == NULL)
 #endif
 		path_strip = _PATH_STRIP;
-
-	switch ((pid = vfork())) {
-	case -1:
-		serrno = errno;
-		(void)unlink(to_name);
-		errc(1, serrno, "forks");
-	case 0:
-		execl(path_strip, "strip", "--", to_name, (char *)NULL);
-		warn("%s", path_strip);
-		_exit(1);
-	default:
-		while (waitpid(pid, &status, 0) == -1) {
-			if (errno != EINTR)
-				break;
-		}
-		if (!WIFEXITED(status))
-			(void)unlink(to_name);
+	args[0] = "strip";
+	if (from_name == NULL) {
+		args[1] = "--";
+		args[2] = to_name;
+		args[3] = NULL;
+	} else {
+		args[1] = "-o";
+		args[2] = to_name;
+		args[3] = "--";
+		args[4] = from_name;
+		args[5] = NULL;
 	}
+	error = posix_spawnp(&pid, path_strip, NULL,
+	    NULL, args, environ);
+	if (error != 0) {
+		(void)unlink(to_name);
+		errc(1, error, "spawn %s", path_strip);
+	}
+	if (waitpid(pid, &status, 0) == -1) {
+		error = errno;
+		(void)unlink(to_name);
+		errc(1, error, "wait");
+		/* NOTREACHED */
+	}
+	if (status != 0) {
+		if (from_name != NULL)
+			return (0);
+		(void)unlink(to_name);
+		errx(1, "strip command %s failed on %s",
+		    path_strip, to_name);
+	}
+	if (from_name != NULL && fsync(to_fd) == -1) {
+		error = errno;
+		(void)unlink(to_name);
+		errno = error;
+		err(1, "fsync failed for %s", to_name);
+	}
+	/*if (dresp != NULL)
+		*dresp = digest_file(to_name);*/
+	return (1);
 }
 
 /*
