@@ -226,9 +226,9 @@ doit(FILE *fout, FILE *fin, bool decode, bool ignore, size_t wrap)
 	int e;
 
 	if (decode)
-		e = b64_decode(stdout, stdin, ignore);
+		e = b64_decode(fout, fin, ignore);
 	else
-		e = b64_encode(stdout, stdin, wrap);
+		e = b64_encode(fout, fin, wrap);
 
 	if (e == 0)
 		return;
