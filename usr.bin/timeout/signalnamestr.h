@@ -1,10 +1,6 @@
 #include <signal.h>
 
 static const char* signalnamestr(int sig) {
-#if defined __GLIBC__ && !defined __UCLIBC__
-    extern const char *const sys_sigabbrev[];
-    return sys_sigabbrev[sig];
-#else
 #ifdef SIGHUP
     if (sig == SIGHUP) return "HUP";
 #endif
@@ -134,6 +130,91 @@ static const char* signalnamestr(int sig) {
 #ifdef SIGCANCEL
     if (sig == SIGCANCEL) return "CANCEL";
 #endif
-    return "Signal 0";
+
+#ifdef SIGBREAK
+    if (sig == SIGBREAK) return "BREAK";
 #endif
+#ifdef SIGCKPT
+    if (sig == SIGCKPT) return "CKPT";
+#endif
+#ifdef SIGCPUFAIL
+    if (sig == SIGCPUFAIL) return "CPUFAIL";
+#endif
+#ifdef SIGDANGER
+    if (sig == SIGDANGER) return "DANGER";
+#endif
+#ifdef SIGKAP
+    if (sig == SIGKAP) return "KAP";
+#endif
+#ifdef SIGKILLTHR
+    if (sig == SIGKILLTHR) return "KILLTHR";
+#endif
+#ifdef SIGKMEM
+    if (sig == SIGKMEM) return "KMEM";
+#endif
+#ifdef SIGKMESS
+    if (sig == SIGKMESS) return "KMESS";
+#endif
+#ifdef SIGKSIG
+    if (sig == SIGKSIG) return "KSIG";
+#endif
+#ifdef SIGKSIGM
+    if (sig == SIGKSIGSM) return "KSIGSM";
+#endif
+#ifdef SIGLIBRT
+    if (sig == SIGLIBRT) return "LIBRT";
+#endif
+#ifdef SIGMIGRATE
+    if (sig == SIGMIGRATE) return "MIGRATE";
+#endif
+#ifdef SIGMSG
+    if (sig == SIGMSG) return "MSG";
+#endif
+#ifdef SIGPRE
+    if (sig == SIGPRE) return "PRE";
+#endif
+#ifdef SIGPTINTR
+    if (sig == SIGPTINTR) return "PTINTR";
+#endif
+#ifdef SIGPTRESCHED
+    if (sig == SIGPTRESCHED) return "PTRESCHED";
+#endif
+#ifdef SIGRECONFIG
+    if (sig == SIGRECONFIG) return "RECONFIG";
+#endif
+#ifdef SIGRECOVERY
+    if (sig == SIGRECOVERY) return "RECOVERY";
+#endif
+#ifdef SIGRESTART
+    if (sig == SIGRESTART) return "RESTART";
+#endif
+#ifdef SIGRETRACT
+    if (sig == SIGRETRACT) return "RETRACT";
+#endif
+#ifdef SIGSAK
+    if (sig == SIGSAK) return "SAK";
+#endif
+#ifdef SIGSNDELAY
+    if (sig == SIGSNDELAY) return "SNDELAY";
+#endif
+#ifdef SIGSOUND
+    if (sig == SIGSOUND) return "SOUND";
+#endif
+#ifdef SIGSYSERROR
+    if (sig == SIGSYSERROR) return "SYSERROR";
+#endif
+#ifdef SIGTALRM
+    if (sig == SIGTALRM) return "TALRM";
+#endif
+#ifdef SIGTHR
+    if (sig == SIGTHR) return "THR";
+#endif
+#ifdef SIGUME
+    if (sig == SIGUME) return "UME";
+#endif
+#ifdef SIGVIRT
+    if (sig == SIGVIRT) return "VIRT";
+#endif
+
+    return "Signal 0";
 }
