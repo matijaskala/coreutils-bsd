@@ -335,7 +335,7 @@ unescape(char *orig)
 			*orig = '\b';
 			continue;
 		case 'e':	/* escape */
-			*orig = '\e';
+			*orig = '\x1B';
 			continue;
 		case 'f':	/* formfeed */
 			*orig = '\f';

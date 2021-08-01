@@ -61,6 +61,7 @@ __FBSDID("$FreeBSD$");
 #include <limits.h>
 #include <paths.h>
 #include <pwd.h>
+#include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,9 +70,6 @@ __FBSDID("$FreeBSD$");
 
 const char *user_from_uid(uid_t uid, int noname);
 const char *group_from_gid(gid_t gid, int noname);
-
-/* Exit code for a failed exec. */
-#define EXEC_FAILED 127
 
 static int	fflg, hflg, iflg, nflg, vflg;
 
@@ -343,6 +341,7 @@ err:		if (unlink(to))
 static int
 copy(const char *from, const char *to)
 {
+	extern char **environ;
 	struct stat sb;
 	int pid, status;
 
@@ -365,10 +364,12 @@ copy(const char *from, const char *to)
 	}
 
 	/* Copy source to destination. */
-	if (!(pid = vfork())) {
-		execl("/bin/cp", "mv", vflg ? "-PRpv" : "-PRp", "--", from, to,
-		    (char *)NULL);
-		_exit(EXEC_FAILED);
+	char *argv1[] = {
+		"mv", vflg ? "-PRpv" : "-PRp", "--", (char *)from, (char *)to, NULL
+	};
+	if (posix_spawn(&pid, "/bin/cp", NULL, NULL, argv1, environ) == -1) {
+		warn("spawn");
+		return (1);
 	}
 	if (waitpid(pid, &status, 0) == -1) {
 		warn("%s %s %s: waitpid", "/bin/cp", from, to);
@@ -382,7 +383,7 @@ copy(const char *from, const char *to)
 	switch (WEXITSTATUS(status)) {
 	case 0:
 		break;
-	case EXEC_FAILED:
+	case 127:
 		warnx("%s %s %s: exec failed", "/bin/cp", from, to);
 		return (1);
 	default:
@@ -392,9 +393,12 @@ copy(const char *from, const char *to)
 	}
 
 	/* Delete the source. */
-	if (!(pid = vfork())) {
-		execl("/bin/rm", "mv", "-rf", "--", from, (char *)NULL);
-		_exit(EXEC_FAILED);
+	char *argv2[] = {
+		"mv", "-rf", "--", (char *)from, NULL
+	};
+	if (posix_spawn(&pid, "/bin/rm", NULL, NULL, argv1, environ) == -1) {
+		warn("spawn");
+		return (1);
 	}
 	if (waitpid(pid, &status, 0) == -1) {
 		warn("%s %s: waitpid", "/bin/rm", from);
@@ -407,7 +411,7 @@ copy(const char *from, const char *to)
 	switch (WEXITSTATUS(status)) {
 	case 0:
 		break;
-	case EXEC_FAILED:
+	case 127:
 		warnx("%s %s: exec failed", "/bin/rm", from);
 		return (1);
 	default:

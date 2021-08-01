@@ -408,8 +408,10 @@ do_rexp(const char *expr)
 		first = 0;
 	}
 
-	if (p == NULL)
+	if (p == NULL) {
+		toomuch(NULL, 0L);
 		errx(1, "%s: no match", re);
+	}
 
 	if (ofs <= 0) {
 		/*

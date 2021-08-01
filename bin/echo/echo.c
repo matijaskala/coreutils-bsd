@@ -44,6 +44,7 @@ __RCSID("$NetBSD: echo.c,v 1.19 2016/09/05 01:00:07 sevan Exp $");
 #endif
 #endif /* not lint */
 
+#include <err.h>
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,7 +76,7 @@ main(int argc, char *argv[])
 		(void)putchar('\n');
 	fflush(stdout);
 	if (ferror(stdout))
-		exit(1);
+		err(1, "write error");
 	exit(0);
 	/* NOTREACHED */
 }
