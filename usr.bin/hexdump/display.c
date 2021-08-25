@@ -257,8 +257,10 @@ get(void)
 			if (vflag != ALL && 
 			    valid_save && 
 			    bcmp(curp, savp, nread) == 0) {
-				if (vflag != DUP)
+				if (vflag != DUP) {
 					(void)printf("*\n");
+					(void)fflush(stdout);
+				}
 				return(NULL);
 			}
 			bzero((char *)curp + nread, need);
@@ -284,8 +286,10 @@ get(void)
 					vflag = WAIT;
 				return(curp);
 			}
-			if (vflag == WAIT)
+			if (vflag == WAIT) {
 				(void)printf("*\n");
+				(void)fflush(stdout);
+			}
 			vflag = DUP;
 			address += blocksize;
 			need = blocksize;

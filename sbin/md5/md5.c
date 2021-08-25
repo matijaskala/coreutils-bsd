@@ -324,11 +324,19 @@ main(int argc, char *argv[])
 	off_t   begin = 0, end = 0; /* To shut compiler warning */
 	unsigned	digest;
 	const char*	progname;
+	int	gnu_emu = 0;
 
 	if ((progname = strrchr(argv[0], '/')) == NULL)
 		progname = argv[0];
 	else
 		progname++;
+
+	size_t len = strlen(progname);
+	if (len > 3 && strcmp(progname + len - 3, "sum") == 0) {
+		progname[len - 3] = 0;
+		rflag = 1;
+		gnu_emu = 1;
+	}
 
 	for (digest = 0; digest < sizeof(Algorithm)/sizeof(*Algorithm); digest++)
 		if (strcasecmp(Algorithm[digest].progname, progname) == 0)
@@ -338,11 +346,13 @@ main(int argc, char *argv[])
 		digest = 0;
 
 	failed = 0;
-	while ((ch = getopt(argc, argv, "hb:e:pqrs:tx")) != -1) {
+	while ((ch = getopt(argc, argv, gnu_emu ? "hbpqrs:tx" : "hb:e:pqrs:tx")) != -1) {
 		switch (ch) {
 		case 'b':
-			begin = parseint(optarg);
-			useoffsets = 1;
+			if (!gnu_emu) {
+				begin = parseint(optarg);
+				useoffsets = 1;
+			}
 			break;
 		case 'e':
 			end = parseint(optarg);
@@ -362,7 +372,8 @@ main(int argc, char *argv[])
 			MDString(&Algorithm[digest], optarg);
 			break;
 		case 't':
-			MDTimeTrial(&Algorithm[digest]);
+			if (!gnu_emu)
+				MDTimeTrial(&Algorithm[digest]);
 			break;
 		case 'x':
 			MDTestSuite(&Algorithm[digest]);
