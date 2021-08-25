@@ -40,7 +40,7 @@
 .Nd display or set date and time
 .Sh SYNOPSIS
 .Nm
-.Op Fl jnRu
+.Op Fl ajnRu
 .Op Fl r Ar seconds | Ar filename
 .Oo
 .Fl v
@@ -49,20 +49,23 @@
 .Ar val Op Ar ymwdHMS
 .Sm on
 .Oc
+.Op Fl z Ar timezone
 .Ar ...
 .Op Cm + Ns Ar output_fmt
 .Nm
-.Op Fl ju
+.Op Fl aju
 .Sm off
 .Op Oo Oo Oo Oo Ar cc Oc Ar yy Oc Ar mm Oc Ar dd Oc Ar HH
 .Ar MM Op Ar .ss
 .Sm on
 .Nm
-.Op Fl jRu
-.Fl f Ar input_fmt new_date
+.Op Fl ajRu
+.Fl f Ar input_fmt
+.Op Fl z Ar timezone
+.Ar new_date
 .Op Cm + Ns Ar output_fmt
 .Nm
-.Op Fl jnu
+.Op Fl ajnu
 .Op Fl I Ns Op Ar FMT
 .Op Fl f Ar input_fmt
 .Op Fl r Ar ...
@@ -90,6 +93,11 @@ the time may not be changed by more than 1 second.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
+.It Fl a
+Use the
+.Xr adjtime 2
+call to gradually skew the local time to the
+desired time rather than just hopping.
 .It Fl f
 Use
 .Ar input_fmt
@@ -264,6 +272,11 @@ Nevertheless, be aware that going forth and back by the same number of
 months may take you to a different date.
 .Pp
 Refer to the examples below for further details.
+.It Fl z
+Just before printing the time, change to the specified timezone.
+This can be used with
+.Fl j
+to easily convert time specifications from one zone to another.
 .El
 .Pp
 An operand with a leading plus
