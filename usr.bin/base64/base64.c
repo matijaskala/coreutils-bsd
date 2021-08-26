@@ -132,7 +132,7 @@ b64_decode(FILE *fout, FILE *fin, bool ignore)
 {
 	int state, c;
 	uint8_t b, out;
-	char *pos;
+	const char *pos;
 
 	state = 0;
 	out = 0;
