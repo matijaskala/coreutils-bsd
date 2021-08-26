@@ -28,7 +28,6 @@
  *
  * @(#)odsyntax.c	8.2 (Berkeley) 5/4/95
  * $FreeBSD: src/usr.bin/hexdump/odsyntax.c,v 1.8.2.1 2002/07/23 14:27:06 tjr Exp $
- * $DragonFly: src/usr.bin/hexdump/odsyntax.c,v 1.3 2003/10/04 20:36:45 hmp Exp $
  */
 
 #include <sys/types.h>
@@ -37,6 +36,7 @@
 #include <err.h>
 #include <errno.h>
 #include <float.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,7 +69,7 @@ oldsyntax(int argc, char ***argvp)
 
 	odmode = 1;
 	argv = *argvp;
-	while ((ch = getopt(argc, argv, "A:aBbcDdeFfHhIij:LlN:Oost:vXx")) != -1)
+	while ((ch = getopt(argc, argv, "A:aBbcDdeFfHhIij:LlN:Oost:vXx")) != -1) {
 		switch (ch) {
 		case 'A':
 			switch (*optarg) {
@@ -160,6 +160,7 @@ oldsyntax(int argc, char ***argvp)
 		default:
 			odusage();
 		}
+	}
 
 	if (fshead->nextfs->nextfs == NULL)
 		odformat("oS");
@@ -307,7 +308,7 @@ odformatfp(char fchar, const char *fmt)
 {
 (void)fchar;
 	size_t isize;
-	int digits;
+	int digits, width;
 	char *end, *hdfmt;
 
 	isize = sizeof(double);
@@ -336,20 +337,24 @@ odformatfp(char fchar, const char *fmt)
 	switch (isize) {
 	case sizeof(float):
 		digits = FLT_DIG;
+		width = digits + 7; /* -x.*e[+-]xx */
 		break;
 	case sizeof(double):
 		digits = DBL_DIG;
+		width = digits + 8; /* -x.*e[+-]xxx */
 		break;
 	default:
-		if (isize == sizeof(long double))
+		if (isize == sizeof(long double)) {
 			digits = LDBL_DIG;
-		else
+			width = digits + 9; /* -x.*e[+-]xxxx */
+		} else {
 			errx(1, "unsupported floating point size %lu",
 			    (u_long)isize);
+		}
 	}
 
 	asprintf(&hdfmt, "%lu/%lu \" %%%d.%de \" \"\\n\"",
-	    16UL / (u_long)isize, (u_long)isize, digits + 8, digits);
+	    16UL / (u_long)isize, (u_long)isize, width, digits);
 	if (hdfmt == NULL)
 		err(1, NULL);
 	odadd(hdfmt);
@@ -404,7 +409,7 @@ odformatint(char fchar, const char *fmt)
 	 * base 8. We need one extra space for signed numbers
 	 * to store the sign.
 	 */
-	n = (1ULL << (8 * isize)) - 1;
+	n = (isize >= sizeof(n)) ? ULLONG_MAX : (1ULL << (8 * isize)) - 1;
 	digits = 0;
 	while (n != 0) {
 		digits++;

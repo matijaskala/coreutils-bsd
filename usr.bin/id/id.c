@@ -95,7 +95,7 @@ main(int argc, char *argv[])
 	}
 
 	while ((ch = getopt(argc, argv,
-	    (isgroups || iswhoami) ? "" : "APGgnpru")) != -1)
+	    (isgroups || iswhoami) ? "" : "APGagnpru")) != -1)
 		switch(ch) {
 #ifdef USE_BSM_AUDIT
 		case 'A':
@@ -107,6 +107,8 @@ main(int argc, char *argv[])
 			break;
 		case 'P':
 			Pflag = 1;
+			break;
+		case 'a':
 			break;
 		case 'g':
 			gflag = 1;
@@ -132,7 +134,7 @@ main(int argc, char *argv[])
 
 	if (iswhoami && argc > 0)
 		usage();
-	if ((cflag || Aflag || Mflag) && argc > 0)
+	if (Aflag && argc > 0)
 		usage();
 
 	switch(Aflag + Gflag + Pflag + gflag + pflag + uflag) {
