@@ -528,7 +528,7 @@ compare(int from_fd, const char *from_name, off_t from_len, int to_fd,
  * strip --
  *	Use strip(1) to strip the target file.
  *	Just invoke strip(1) on to_name if from_name is NULL, else try
- *	to run "strip -o to_name -- from_name" and return 0 on failure.
+ *	to run "strip -o to_name from_name" and return 0 on failure.
  *	Return 1 on success and assign result of digest_file(to_name)
  *	to *dresp.
  */
@@ -536,10 +536,12 @@ int
 strip(char *to_name, int to_fd, char *from_name, char **dresp)
 {
 	const char *path_strip;
-	char *args[6];
+	char *args[5];
+	char *prefixed_from_name;
 	pid_t pid;
 	int error, status;
 
+	prefixed_from_name = NULL;
 #if defined __GLIBC__ && !defined __UCLIBC__
 	if ((path_strip = secure_getenv("STRIP")) == NULL)
 #else
@@ -548,15 +550,18 @@ strip(char *to_name, int to_fd, char *from_name, char **dresp)
 		path_strip = _PATH_STRIP;
 	args[0] = "strip";
 	if (from_name == NULL) {
-		args[1] = "--";
-		args[2] = to_name;
-		args[3] = NULL;
+		args[1] = to_name;
+		args[2] = NULL;
 	} else {
 		args[1] = "-o";
 		args[2] = to_name;
-		args[3] = "--";
-		args[4] = from_name;
-		args[5] = NULL;
+		args[3] = from_name;
+		if (from_name[0] == '-') {
+			if (asprintf(&prefixed_from_name, "./%s", from_name) == -1)
+				return 0;
+			args[3] = prefixed_from_name;
+		}
+		args[4] = NULL;
 	}
 	error = posix_spawnp(&pid, path_strip, NULL,
 	    NULL, args, environ);
@@ -564,6 +569,7 @@ strip(char *to_name, int to_fd, char *from_name, char **dresp)
 		(void)unlink(to_name);
 		errc(1, error, "spawn %s", path_strip);
 	}
+	free(prefixed_from_name);
 	if (waitpid(pid, &status, 0) == -1) {
 		error = errno;
 		(void)unlink(to_name);
