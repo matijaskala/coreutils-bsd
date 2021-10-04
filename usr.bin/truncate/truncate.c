@@ -65,7 +65,6 @@ main(int argc, char **argv)
 	int do_refer;
 	int got_size;
 	char *fname, *rname;
-	struct spacectl_range sr;
 
 	fd = -1;
 	rsize = tsize = sz = off = 0;
@@ -79,10 +78,6 @@ main(int argc, char **argv)
 		switch (ch) {
 		case 'c':
 			no_create = 1;
-			break;
-		case 'd':
-			do_dealloc = 1;
-			do_truncate = 0;
 			break;
 		case 'r':
 			do_refer = 1;
@@ -200,11 +195,6 @@ main(int argc, char **argv)
 		if (tsize < 0)
 			tsize = 0;
 
-		if (do_dealloc == 1) {
-			sr.r_offset = off;
-			sr.r_len = len;
-			r = fspacectl(fd, SPACECTL_DEALLOC, &sr, 0, &sr);
-		}
 		if (do_truncate == 1)
 			r = ftruncate(fd, tsize);
 		if (r == -1) {

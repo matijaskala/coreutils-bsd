@@ -54,26 +54,6 @@
 .Fl r Ar rfile
 .Ek
 .Ar
-.Nm
-.Op Fl c
-.Bk -words
-.Fl d
-.Oo
-.Fl o Xo
-.Sm off
-.Ar offset
-.Op Cm SUFFIX
-.Sm on
-.Xc
-.Oc
-.Fl l Xo
-.Sm off
-.Ar length
-.Op Cm SUFFIX
-.Sm on
-.Xc
-.Ek
-.Ar
 .Sh DESCRIPTION
 The
 .Nm
@@ -126,10 +106,6 @@ Otherwise, the
 .Ar size
 argument specifies an absolute length to which all files
 should be extended or reduced as appropriate.
-.It Fl d
-Zero a region in the specified file.
-If the underlying file system of the given file supports hole-punching,
-file system space deallocation may be performed in the operation region.
 .It Fl o Ar offset
 The space management operation is performed at the given
 .Ar offset
@@ -137,9 +113,6 @@ bytes in the file.
 If this option is not specified, the operation is performed at the beginning of the file.
 .It Fl l Ar length
 The length of the operation range in bytes.
-This option must always be specified if option
-.Fl d
-is specified, and must be greater than 0.
 .El
 .Pp
 The
@@ -158,10 +131,9 @@ Kilobytes, Megabytes, Gigabytes or Terabytes
 respectively.
 .Pp
 Exactly one of the
-.Fl r ,
-.Fl s
+.Fl r
 and
-.Fl d
+.Fl s
 options must be specified.
 .Pp
 If a file is made smaller, its extra data is lost.
