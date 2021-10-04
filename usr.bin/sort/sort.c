@@ -1234,7 +1234,8 @@ main(int argc, char **argv)
 		errx(1, "%c:%c: %s", 'm', 'c', getstr(1));
 
 #ifndef WITHOUT_NLS
-	catclose(catalog);
+	if (catalog != (nl_catd) -1)
+		catclose(catalog);
 #endif
 
 	if (keys_num == 0) {

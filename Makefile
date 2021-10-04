@@ -25,16 +25,16 @@ build-%: usr.sbin/%
 	@$(MAKE) -C $<
 
 install-%: bin/%
-	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
+	@$(MAKE) -C $< install DESTDIR="$$(case '$(DESTDIR)' in /*) echo '$(DESTDIR)' ;; *) echo '$(CURDIR)/$(DESTDIR)' ;; esac )"
 
 install-%: sbin/%
-	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
+	@$(MAKE) -C $< install DESTDIR="$$(case '$(DESTDIR)' in /*) echo '$(DESTDIR)' ;; *) echo '$(CURDIR)/$(DESTDIR)' ;; esac )"
 
 install-%: usr.bin/%
-	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
+	@$(MAKE) -C $< install DESTDIR="$$(case '$(DESTDIR)' in /*) echo '$(DESTDIR)' ;; *) echo '$(CURDIR)/$(DESTDIR)' ;; esac )"
 
 install-%: usr.sbin/%
-	@$(MAKE) -C $< install DESTDIR='$(shell test -n '$(DESTDIR)' && realpath '$(DESTDIR)')'
+	@$(MAKE) -C $< install DESTDIR="$$(case '$(DESTDIR)' in /*) echo '$(DESTDIR)' ;; *) echo '$(CURDIR)/$(DESTDIR)' ;; esac )"
 
 clean-%: bin/%
 	@$(MAKE) -C $< clean
