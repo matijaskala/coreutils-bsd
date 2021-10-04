@@ -32,9 +32,11 @@
 #include <time.h>
 #include <unistd.h>
 #include <sysexits.h>
-#include <openssl/md5.h>
-#include <openssl/ripemd.h>
-#include <openssl/sha.h>
+#include <md5.h>
+#include <ripemd.h>
+#include <sha.h>
+#include <sha256.h>
+#include <sha512.h>
 
 /*
  * Length of test block, number of test blocks.
@@ -89,8 +91,8 @@ typedef union {
 /* algorithm function table */
 
 static const struct Algorithm_t Algorithm[] = {
-	{ "md5", "MD5", &MD5_TestOutput, (DIGEST_Init*)&MD5_Init,
-		(DIGEST_Update*)&MD5_Update, (DIGEST_Final*)&MD5_Final,
+	{ "md5", "MD5", &MD5_TestOutput, (DIGEST_Init*)&MD5Init,
+		(DIGEST_Update*)&MD5Update, (DIGEST_Final*)&MD5Final,
 		MD5_DIGEST_LENGTH},
 	{ "sha1", "SHA1", &SHA1_TestOutput, (DIGEST_Init*)&SHA1_Init,
 		(DIGEST_Update*)&SHA1_Update, (DIGEST_Final*)&SHA1_Final,
@@ -333,13 +335,13 @@ main(int argc, char *argv[])
 
 	size_t len = strlen(progname);
 	if (len > 3 && strcmp(progname + len - 3, "sum") == 0) {
-		progname[len - 3] = 0;
+		len -= 3;
 		rflag = 1;
 		gnu_emu = 1;
 	}
 
 	for (digest = 0; digest < sizeof(Algorithm)/sizeof(*Algorithm); digest++)
-		if (strcasecmp(Algorithm[digest].progname, progname) == 0)
+		if (strncasecmp(Algorithm[digest].progname, progname, len) == 0)
 			break;
 
 	if (digest == sizeof(Algorithm)/sizeof(*Algorithm))

@@ -1,6 +1,6 @@
 include ../../common.mk
 
-CFLAGS += $(shell pkg-config --cflags --libs libcrypto)
+CFLAGS += $(shell pkg-config --cflags --libs libmd)
 
 install: install-md5
 	ln -sf md5 $(BINDIR)/rmd160

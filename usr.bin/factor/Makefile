@@ -1,7 +1,5 @@
 include ../../common.mk
 
-CFLAGS += -DHAVE_OPENSSL $(shell pkg-config --cflags --libs libcrypto)
-
 factor: factor.c pr_tbl.c
 
 install: install-factor
