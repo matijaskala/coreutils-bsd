@@ -1,7 +1,7 @@
 PROGS = cat chmod cp date dd df domainname echo expr hostname kill ln ls mkdir mv pwd rm rmdir sleep stty sync test \
         md5 mknod realpath \
-        arch base64 basename cksum comm csplit cut dirname du env expand factor false fmt fold head hexdump id join \
-        logname mktemp nice nl nohup paste pathchk pr primes printenv printf seq sort split stat stdbuf \
+        arch base64 basename cksum comm csplit cut dirname du env expand factor false fmt fold head id join \
+        logname mktemp nice nl nohup od paste pathchk pr primes printenv printf seq sort split stat stdbuf \
         tail tee timeout touch tr true truncate tsort tty uname unexpand uniq users wc which who xinstall yes \
         chroot link
 
