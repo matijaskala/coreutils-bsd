@@ -29,10 +29,8 @@
 .\" SUCH DAMAGE.
 .\"
 .\"	@(#)cksum.1	8.2 (Berkeley) 4/28/95
-.\" $FreeBSD: src/usr.bin/cksum/cksum.1,v 1.19 2005/01/17 07:44:13 ru Exp $
-.\" $DragonFly: src/usr.bin/cksum/cksum.1,v 1.4 2008/05/02 02:05:07 swildner Exp $
 .\"
-.Dd April 28, 1995
+.Dd $Mdocdate: October 10 2021 $
 .Dt CKSUM 1
 .Os
 .Sh NAME
@@ -40,21 +38,38 @@
 .Nm sum
 .Nd display file checksums and block counts
 .Sh SYNOPSIS
-.Nm
+.Nm cksum
+.Bk -words
+.Op Fl cnpqrtx
+.Op Fl a Ar algorithms
+.Op Fl C Ar checklist
+.Op Fl h Ar hashfile
 .Op Fl o Ar 1 | 2 | 3
+.Op Fl s Ar string
 .Op Ar
+.Ek
 .Nm sum
+.Op Fl rs
 .Op Ar
 .Sh DESCRIPTION
 The
-.Nm
-utility writes to the standard output three whitespace separated
-fields for each input file.
-These fields are a checksum
-.Tn CRC ,
-the total number of octets in the file and the file name.
+.Nm cksum
+utility writes to the standard output a single line for each input file.
+The format of this line varies with the algorithm being used as follows:
+.Bl -tag -width allxothers
+.It crc, crc32, sum1, sum2
+The output line consists of three whitespace separated fields:
+a CRC checksum, the number of octets in the input,
+and name of the file or string.
 If no file name is specified, the standard input is used and no file name
 is written.
+.It all others
+The output line consists of four whitespace separated fields:
+the name of the algorithm used, the name of the file or string in
+parentheses, an equals sign, and the cryptographic hash of the input.
+If no file name is specified, the standard input is used and only
+the cryptographic hash is output.
+.El
 .Pp
 The
 .Nm sum
@@ -64,8 +79,61 @@ utility, except that it defaults to using historic algorithm 1, as
 described below.
 It is provided for compatibility only.
 .Pp
-The options are as follows:
-.Bl -tag -width indent
+The options for
+.Nm cksum
+are as follows:
+.Bl -tag -width Ds
+.It Fl a Ar algorithms
+Use the specified algorithm(s) instead of the default (cksum).
+Supported algorithms include cksum, md5, rmd160, sha1,
+sha224, sha256, sha384, sha512/256, and sha512.
+Multiple algorithms may be specified, separated by a comma or whitespace.
+Additionally, multiple
+.Fl a
+options may be specified on the command line.
+Case is ignored when matching algorithms.
+The output format may be specified on a per-algorithm basis
+by using a single-character suffix, e.g.\&
+.Dq sha256b .
+If the algorithm has a
+.Sq b
+suffix, the checksum will be output in base64 format.
+If the algorithm has an
+.Sq x
+suffix, the checksum will be output in hex format.
+If an algorithm with the same output format is repeated,
+only the first instance is used.
+Note that output format suffixes are not supported
+for the cksum algorithm.
+.It Fl C Ar checklist
+Compare the checksum of each
+.Ar file
+against the checksums in the
+.Ar checklist .
+Any specified
+.Ar file
+that is not listed in the
+.Ar checklist
+will generate an error.
+.It Fl c
+If this option is specified, the
+.Ar file
+options become checklists.
+Each checklist should contain hash results in the normal format,
+which will be verified against the specified paths.
+Output consists of the digest used, the file name,
+and an OK, FAILED, or MISSING for the result of the comparison.
+This will validate any of the supported checksums.
+If no file is given, stdin is used.
+The
+.Fl c
+option may not be used in conjunction with more than a single
+.Fl a
+option.
+.It Fl h Ar hashfile
+Place the checksum into
+.Ar hashfile
+instead of stdout.
 .It Fl o
 Use historic algorithms instead of the (superior) default one.
 .Pp
@@ -107,18 +175,43 @@ replaced with the size of the file in blocks.
 For historic reasons, the block size is 1024 for algorithm 1 and 512
 for algorithm 2.
 Partial blocks are rounded up.
+.It Fl p
+Echoes stdin to stdout and appends the
+checksum to stdout.
+.It Fl q
+Only print the checksum (quiet mode) or if used in conjunction with the
+.Fl c
+flag, only print the failed cases.
+.It Fl r
+Reverse the format of the hash algorithm output, making
+it match the checksum output format.
+.It Fl s Ar string
+Prints a checksum of the given
+.Ar string .
+.It Fl t
+Runs a built-in time trial.
+Specifying
+.Fl t
+multiple times results in the number of rounds being multiplied
+by 10 for each additional flag.
+.It Fl x
+Runs a built-in test script.
 .El
 .Pp
-The default
-.Tn CRC
-used is based on the polynomial used for
-.Tn CRC
-error checking
+The options for
+.Nm sum
+are:
+.Bl -tag -width Ds
+.It Fl r
+Use Algorithm 1
+.It Fl s
+Use Algorithm 2
+.El
+.Pp
+The default CRC used is based on the polynomial used for CRC error checking
 in the networking standard
-.St -iso8802-3 .
-The
-.Tn CRC
-checksum encoding is defined by the generating polynomial:
+ISO/IEC 8802-3:1996.
+The CRC checksum encoding is defined by the generating polynomial:
 .Bd -unfilled -offset indent
 G(x) = x^32 + x^26 + x^23 + x^22 + x^16 + x^12 +
      x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1
@@ -151,19 +244,19 @@ The coefficients of R(x) are considered to be a 32-bit sequence.
 .Pp
 The bit sequence is complemented and the result is the CRC.
 .Ed
+The other available algorithms are described in their respective
+man pages in section 3 of the manual.
 .Sh EXIT STATUS
 .Ex -std cksum sum
 .Sh SEE ALSO
 .Xr md5 1
 .Pp
 The default calculation is identical to that given in pseudo-code
-in the following
-.Tn ACM
-article.
+in the following ACM article:
 .Rs
 .%T "Computation of Cyclic Redundancy Checks Via Table Lookup"
 .%A Dilip V. Sarwate
-.%J "Communications of the" Tn ACM
+.%J "Communications of the ACM"
 .%D "August 1988"
 .Re
 .Sh STANDARDS
@@ -173,6 +266,11 @@ utility is expected to conform to
 .St -p1003.2-92 .
 .Sh HISTORY
 The
-.Nm
+.Nm cksum
 utility appeared in
 .Bx 4.4 .
+.Sh CAVEATS
+Do not use the cksum or md5 algorithms to verify file integrity.
+An attacker can trivially produce modified payload that
+has the same checksum as the original version.
+Use a cryptographic checksum instead.
