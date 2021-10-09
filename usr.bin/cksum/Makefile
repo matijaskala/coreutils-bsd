@@ -1,6 +1,8 @@
 include ../../common.mk
 
-cksum: cksum.c crc.c print.c sum1.c sum2.c crc32.c
+CFLAGS += -D_GNU_SOURCE $(shell pkg-config --cflags --libs libmd)
+
+cksum: base64.c cksum.c crc.c crc32.c sum1.c sum2.c
 
 install: install-cksum
 	ln -sf cksum $(BINDIR)/sum

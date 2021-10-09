@@ -31,37 +31,51 @@
  * $DragonFly: src/usr.bin/cksum/sum1.c,v 1.4 2005/04/10 20:55:38 drhodus Exp $
  */
 
-#include <sys/types.h>
-
-#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "extern.h"
+#include "cksum.h"
 
-int
-csum1(int fd, uint32_t *cval, off_t *clen)
+void
+SUM1_Init(CKSUM_CTX *ctx)
 {
-	int nr;
-	u_int lcrc;
-	off_t total;
-	u_char *p;
-	u_char buf[8192];
+	ctx->crc = 0;
+	ctx->len = 0;
+}
 
-	/*
-	 * 16-bit checksum, rotating right before each addition;
-	 * overflow is discarded.
-	 */
-	lcrc = total = 0;
-	while ((nr = read(fd, buf, sizeof(buf))) > 0)
-		for (total += nr, p = buf; nr--; ++p) {
-			if (lcrc & 1)
-				lcrc |= 0x10000;
-			lcrc = ((lcrc >> 1) + *p) & 0xffff;
-		}
-	if (nr < 0)
-		return (1);
+void
+SUM1_Update(CKSUM_CTX *ctx, const unsigned char *buf, size_t len)
+{
+	size_t i;
 
-	*cval = lcrc;
-	*clen = total;
-	return (0);
+	for (i = 0; i < len; i++) {
+		if (ctx->crc & 1)
+			ctx->crc |= 0x10000;
+		ctx->crc = ((ctx->crc >> 1) + buf[i]) & 0xffff;
+	}
+	ctx->len += len;
+}
+
+void
+SUM1_Final(CKSUM_CTX *ctx)
+{
+}
+
+char *
+SUM1_End(CKSUM_CTX *ctx, char *outstr)
+{
+	CRC32_Final(ctx);
+
+	if (outstr == NULL) {
+		if (asprintf(&outstr, "%u %lld", ctx->crc, (ctx->len + 1023) / 1024) == -1)
+			return (NULL);
+	} else {
+		(void)snprintf(outstr, (size_t)CRC32_DIGEST_STRING_LENGTH,
+		    "%u %lld", ctx->crc, (ctx->len + 1023) / 1024);
+	}
+
+	return (outstr);
 }

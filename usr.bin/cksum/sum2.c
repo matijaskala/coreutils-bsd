@@ -31,40 +31,53 @@
  * $DragonFly: src/usr.bin/cksum/sum2.c,v 1.4 2005/04/10 20:55:38 drhodus Exp $
  */
 
-#include <sys/types.h>
-
-#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "extern.h"
+#include "cksum.h"
 
-int
-csum2(int fd, uint32_t *cval, off_t *clen)
+void
+SUM2_Init(CKSUM_CTX *ctx)
 {
-	uint32_t lcrc;
-	int nr;
-	off_t total;
-	u_char *p;
-	u_char buf[8192];
+	ctx->crc = 0;
+	ctx->len = 0;
+}
 
-	/*
-	 * Draft 8 POSIX 1003.2:
-	 *
-	 *   s = sum of all bytes
-	 *   r = s % 2^16 + (s % 2^32) / 2^16
-	 * lcrc = (r % 2^16) + r / 2^16
-	 */
-	lcrc = total = 0;
-	while ((nr = read(fd, buf, sizeof(buf))) > 0)
-		for (total += nr, p = buf; nr--; ++p)
-			lcrc += *p;
-	if (nr < 0)
-		return (1);
+void
+SUM2_Update(CKSUM_CTX *ctx, const unsigned char *buf, size_t len)
+{
+	size_t i;
 
-	lcrc = (lcrc & 0xffff) + (lcrc >> 16);
-	lcrc = (lcrc & 0xffff) + (lcrc >> 16);
+	for (i = 0; i < len; i++) {
+		if (ctx->crc & 1)
+			ctx->crc |= 0x10000;
+		ctx->crc += buf[i];
+	}
+	ctx->len += len;
+}
 
-	*cval = lcrc;
-	*clen = total;
-	return (0);
+void
+SUM2_Final(CKSUM_CTX *ctx)
+{
+	ctx->crc = (ctx->crc & 0xffff) + (ctx->crc >> 16);
+	ctx->crc = (ctx->crc & 0xffff) + (ctx->crc >> 16);
+}
+
+char *
+SUM2_End(CKSUM_CTX *ctx, char *outstr)
+{
+	CRC32_Final(ctx);
+
+	if (outstr == NULL) {
+		if (asprintf(&outstr, "%u %lld", ctx->crc, (ctx->len + 511) / 512) == -1)
+			return (NULL);
+	} else {
+		(void)snprintf(outstr, (size_t)CRC32_DIGEST_STRING_LENGTH,
+		    "%u %lld", ctx->crc, (ctx->len + 511) / 512);
+	}
+
+	return (outstr);
 }

@@ -14,15 +14,13 @@
  * $DragonFly: src/usr.bin/cksum/crc32.c,v 1.4 2005/04/10 20:55:38 drhodus Exp $
  */
 
-#include <sys/types.h>
-
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
-
-#define CRC(crc, ch)	 (crc = (crc >> 8) ^ crctab[(crc ^ (ch)) & 0xff])
+#include "cksum.h"
 
 /* generated using the AUTODIN II polynomial
  *	x^32 + x^26 + x^23 + x^22 + x^16 +
@@ -95,28 +93,45 @@ static const uint32_t crctab[256] = {
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
 
-uint32_t crc32_total = 0;
-
-int
-crc32(int fd, uint32_t *cval, off_t *clen)
+void
+CRC32_Init(CKSUM_CTX *ctx)
 {
-    uint32_t lcrc = ~0;
-    int nr ;
-    off_t len ;
-    char buf[BUFSIZ], *p ;
-	
-    len = 0 ;
-    crc32_total = ~crc32_total ;
-    while ((nr = read(fd, buf, sizeof(buf))) > 0)
-        for (len += nr, p = buf; nr--; ++p) {
-	    CRC(lcrc, *p) ;
-	    CRC(crc32_total, *p) ;
-	}
-    if (nr < 0)
-        return 1 ;
+	ctx->crc = 0;
+	ctx->len = 0;
+}
 
-    *clen = len ;
-    *cval = ~lcrc ;
-    crc32_total = ~crc32_total ;
-    return 0 ;
+#define	UPDATE(crc, ch) do						\
+	(crc) = (crc >> 8) ^ crctab[(crc ^ (ch)) & 0xff];	\
+while(0)
+
+void
+CRC32_Update(CKSUM_CTX *ctx, const unsigned char *buf, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i < len; i++)
+		UPDATE(ctx->crc, buf[i]);
+	ctx->len += len;
+}
+
+void
+CRC32_Final(CKSUM_CTX *ctx)
+{
+	ctx->crc = ~ctx->crc;
+}
+
+char *
+CRC32_End(CKSUM_CTX *ctx, char *outstr)
+{
+	CRC32_Final(ctx);
+
+	if (outstr == NULL) {
+		if (asprintf(&outstr, "%u %lld", ctx->crc, ctx->len) == -1)
+			return (NULL);
+	} else {
+		(void)snprintf(outstr, (size_t)CRC32_DIGEST_STRING_LENGTH,
+		    "%u %lld", ctx->crc, ctx->len);
+	}
+
+	return (outstr);
 }
