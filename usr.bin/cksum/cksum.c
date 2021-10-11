@@ -247,7 +247,9 @@ static void hash_insert(struct hash_list *, struct hash_function *, int);
 static void usage(void) __attribute__((__noreturn__));
 
 extern char *__progname;
+static int bflag = 0;
 static int qflag = 0;
+static int gnu_emu = 0;
 static FILE *ofile = NULL;
 
 int
@@ -260,12 +262,11 @@ main(int argc, char **argv)
 	const char *optstr;
 	int fl, error, base64;
 	int cflag, pflag, rflag, tflag, xflag;
-	int gnu_emu;
 
 	TAILQ_INIT(&hl);
 	input_string = NULL;
 	selective_checklist = NULL;
-	error = cflag = pflag = qflag = rflag = tflag = xflag = 0;
+	error = bflag = cflag = pflag = qflag = rflag = tflag = xflag = 0;
 	gnu_emu = 0;
 
 	len = strlen(__progname);
@@ -274,7 +275,7 @@ main(int argc, char **argv)
 		optstr = "a:C:ch:no:pqrs:tx";
 	else
 #endif /* !defined(SHA2_ONLY) */
-	if (len > 3 && strcmp(__progname + len - 3, "sum") == 0) {
+	if (len > 3 && memcmp(__progname + len - 3, "sum", 3) == 0) {
 		len -= 3;
 		rflag = 1;
 		gnu_emu = 1;
@@ -283,6 +284,7 @@ main(int argc, char **argv)
 	else
 		optstr = "C:ch:npqrs:tx";
 
+#if !defined(SHA2_ONLY)
 	if (!strcmp(__progname, "sum")) {
 		for (hf = functions; hf->name != NULL; hf++) {
 			if (strcasecmp(hf->name, "old1") == 0)
@@ -313,8 +315,9 @@ main(int argc, char **argv)
 			}
 		hash_insert(&hl, hf, 0);
 	}
-
-	else while ((fl = getopt(argc, argv, optstr)) != -1) {
+	else
+#endif /* !defined(SHA2_ONLY) */
+	while ((fl = getopt(argc, argv, optstr)) != -1) {
 		switch (fl) {
 		case 'a':
 			while ((cp = strsep(&optarg, " \t,")) != NULL) {
@@ -357,6 +360,8 @@ main(int argc, char **argv)
 			}
 			break;
 		case 'b':
+			if (gnu_emu)
+				bflag = 1;
 			break;
 		case 'h':
 			ofile = fopen(optarg, "w");
@@ -369,10 +374,6 @@ main(int argc, char **argv)
 			break;
 		case 'c':
 			cflag = 1;
-			break;
-#endif /* !defined(SHA2_ONLY) */
-		case 'n':
-			rflag = 1;
 			break;
 		case 'o':
 			if (!TAILQ_EMPTY(&hl)) {
@@ -407,6 +408,10 @@ main(int argc, char **argv)
 				warnx("illegal argument to -o option");
 				usage();
 			}
+			break;
+#endif /* !defined(SHA2_ONLY) */
+		case 'n':
+			rflag = 1;
 			break;
 		case 'p':
 			pflag = 1;
@@ -562,7 +567,12 @@ digest_print(const struct hash_function *hf, const char *what,
 		(void)fprintf(ofile, "%s (%s) = %s\n", hf->name, what, digest);
 		break;
 	case STYLE_CKSUM:
-		(void)fprintf(ofile, "%s %s\n", digest, what);
+		if (gnu_emu && bflag)
+			(void)fprintf(ofile, "%s *%s\n", digest, what);
+		else if (gnu_emu)
+			(void)fprintf(ofile, "%s  %s\n", digest, what);
+		else
+			(void)fprintf(ofile, "%s %s\n", digest, what);
 		break;
 	case STYLE_TERSE:
 		(void)fprintf(ofile, "%s\n", digest);
@@ -580,7 +590,12 @@ digest_printstr(const struct hash_function *hf, const char *what,
 		(void)fprintf(ofile, "%s (\"%s\") = %s\n", hf->name, what, digest);
 		break;
 	case STYLE_CKSUM:
-		(void)fprintf(ofile, "%s %s\n", digest, what);
+		if (gnu_emu && bflag)
+			(void)fprintf(ofile, "%s *%s\n", digest, what);
+		else if (gnu_emu)
+			(void)fprintf(ofile, "%s  %s\n", digest, what);
+		else
+			(void)fprintf(ofile, "%s %s\n", digest, what);
 		break;
 	case STYLE_TERSE:
 		(void)fprintf(ofile, "%s\n", digest);
@@ -943,19 +958,25 @@ digest_test(struct hash_list *hl)
 static void
 usage(void)
 {
+	size_t len = strlen(__progname);
 #if !defined(SHA2_ONLY)
-	if (strcmp(__progname, "cksum") == 0)
+	if (len == 5 && memcmp(__progname, "cksum", 5) == 0)
 		fprintf(stderr, "usage: %s [-cnpqrtx] [-a algorithm] [-C checklist] "
-		    "[-o 1|2|3] "
+		    "[-h hashfile] [-o 1|2|3] \n"
 		    "	[-s string] [file ...]\n",
 		    __progname);
-	else if (strcmp(__progname, "sum") == 0)
+	else if (len == 3 && memcmp(__progname, "sum", 3) == 0)
 		fprintf(stderr, "usage: sum [-rs] [file ...]\n");
 	else
 #endif /* !defined(SHA2_ONLY) */
+	if (len > 3 && memcmp(__progname + len - 3, "sum", 3) == 0)
 		fprintf(stderr, "usage:"
-		    "\t%s [-cnpqrtx] [-C checklist] "
-		    "[-o 1|2|3] [-s string] "
+		    "\t%s [-bcnpqrtx] [-C checklist] [-h hashfile] [-s string] "
+		    "[file ...]\n",
+		    __progname);
+	else
+		fprintf(stderr, "usage:"
+		    "\t%s [-cnpqrtx] [-C checklist] [-h hashfile] [-s string] "
 		    "[file ...]\n",
 		    __progname);
 
