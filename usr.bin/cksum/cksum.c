@@ -37,13 +37,12 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <ripemd.h>
-#include <sha.h>
-
 #include "cksum.h"
 #include "md2.h"
 #include "md4.h"
 #include "md5.h"
+#include "rmd160.h"
+#include "sha1.h"
 #include "sha224.h"
 #include "sha256.h"
 #include "sha384.h"
@@ -62,7 +61,7 @@ union ANY_CTX {
 #if !defined(SHA2_ONLY)
 	CKSUM_CTX cksum;
 	MD5_CTX md5;
-	RIPEMD160_CTX rmd160;
+	RMD160_CTX rmd160;
 	SHA1_CTX sha1;
 #endif /* !defined(SHA2_ONLY) */
 	SHA256_CTX sha256;
@@ -170,26 +169,26 @@ struct hash_function {
 	{
 		"RMD160",
 		"RMD160",
-		RIPEMD160_DIGEST_LENGTH,
+		RMD160_DIGEST_LENGTH,
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))RIPEMD160_Init,
-		(void (*)(void *, const unsigned char *, size_t))RIPEMD160_Update,
-		(void (*)(unsigned char *, void *))RIPEMD160_Final,
-		(char *(*)(void *, char *))RIPEMD160_End
+		(void (*)(void *))RMD160Init,
+		(void (*)(void *, const unsigned char *, size_t))RMD160Update,
+		(void (*)(unsigned char *, void *))RMD160Final,
+		(char *(*)(void *, char *))RMD160End
 	},
 	{
 		"SHA1",
 		"SHA1",
-		SHA_DIGEST_LENGTH,
+		SHA1_DIGEST_LENGTH,
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))SHA1_Init,
-		(void (*)(void *, const unsigned char *, size_t))SHA1_Update,
-		(void (*)(unsigned char *, void *))SHA1_Final,
-		(char *(*)(void *, char *))SHA1_End
+		(void (*)(void *))SHA1Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA1Update,
+		(void (*)(unsigned char *, void *))SHA1Final,
+		(char *(*)(void *, char *))SHA1End
 	},
 	{
 		"SHA224",
