@@ -260,17 +260,28 @@ main(int argc, char **argv)
 	const char *optstr;
 	int fl, error, base64;
 	int cflag, pflag, rflag, tflag, xflag;
+	int gnu_emu;
 
 	TAILQ_INIT(&hl);
 	input_string = NULL;
 	selective_checklist = NULL;
 	error = cflag = pflag = qflag = rflag = tflag = xflag = 0;
+	gnu_emu = 0;
 
+	len = strlen(__progname);
 #if !defined(SHA2_ONLY)
-	if (strcmp(__progname, "cksum") == 0)
+	if (len == 5 && memcmp(__progname, "cksum", 5) == 0)
 		optstr = "a:C:ch:no:pqrs:tx";
+	else
 #endif /* !defined(SHA2_ONLY) */
-		optstr = "C:ch:no:pqrs:tx";
+	if (len > 3 && strcmp(__progname + len - 3, "sum") == 0) {
+		len -= 3;
+		rflag = 1;
+		gnu_emu = 1;
+		optstr = "bC:ch:npqrs:tx";
+	}
+	else
+		optstr = "C:ch:npqrs:tx";
 
 	if (!strcmp(__progname, "sum")) {
 		for (hf = functions; hf->name != NULL; hf++) {
@@ -345,6 +356,8 @@ main(int argc, char **argv)
 					hash_insert(&hl, hf, base64);
 			}
 			break;
+		case 'b':
+			break;
 		case 'h':
 			ofile = fopen(optarg, "w");
 			if (ofile == NULL)
@@ -408,7 +421,8 @@ main(int argc, char **argv)
 			input_string = optarg;
 			break;
 		case 't':
-			tflag++;
+			if (!gnu_emu)
+				tflag++;
 			break;
 		case 'x':
 			xflag = 1;
@@ -438,7 +452,7 @@ main(int argc, char **argv)
 	/* No algorithm specified, check the name we were called as. */
 	if (TAILQ_EMPTY(&hl)) {
 		for (hf = functions; hf->name != NULL; hf++) {
-			if (strcasecmp(hf->progname, __progname) == 0)
+			if (strncasecmp(hf->progname, __progname, len) == 0 && strnlen(hf->progname, len+1) <= len)
 				break;
 		}
 		if (hf->name == NULL)
