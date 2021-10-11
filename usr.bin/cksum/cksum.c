@@ -37,14 +37,17 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <md2.h>
-#include <md4.h>
-#include <md5.h>
-#include <rmd160.h>
-#include <sha1.h>
-#include <sha2.h>
+#include <ripemd.h>
+#include <sha.h>
 
 #include "cksum.h"
+#include "md2.h"
+#include "md4.h"
+#include "md5.h"
+#include "sha224.h"
+#include "sha256.h"
+#include "sha384.h"
+#include "sha512t.h"
 
 #define STYLE_MD5	0
 #define STYLE_CKSUM	1
@@ -59,10 +62,11 @@ union ANY_CTX {
 #if !defined(SHA2_ONLY)
 	CKSUM_CTX cksum;
 	MD5_CTX md5;
-	RMD160_CTX rmd160;
+	RIPEMD160_CTX rmd160;
 	SHA1_CTX sha1;
 #endif /* !defined(SHA2_ONLY) */
-	SHA2_CTX sha2;
+	SHA256_CTX sha256;
+	SHA512_CTX sha512;
 };
 
 struct hash_function {
@@ -166,26 +170,38 @@ struct hash_function {
 	{
 		"RMD160",
 		"RMD160",
-		RMD160_DIGEST_LENGTH,
+		RIPEMD160_DIGEST_LENGTH,
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))RMD160Init,
-		(void (*)(void *, const unsigned char *, size_t))RMD160Update,
-		(void (*)(unsigned char *, void *))RMD160Final,
-		(char *(*)(void *, char *))RMD160End
+		(void (*)(void *))RIPEMD160_Init,
+		(void (*)(void *, const unsigned char *, size_t))RIPEMD160_Update,
+		(void (*)(unsigned char *, void *))RIPEMD160_Final,
+		(char *(*)(void *, char *))RIPEMD160_End
 	},
 	{
 		"SHA1",
 		"SHA1",
-		SHA1_DIGEST_LENGTH,
+		SHA_DIGEST_LENGTH,
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))SHA1Init,
-		(void (*)(void *, const unsigned char *, size_t))SHA1Update,
-		(void (*)(unsigned char *, void *))SHA1Final,
-		(char *(*)(void *, char *))SHA1End
+		(void (*)(void *))SHA1_Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA1_Update,
+		(void (*)(unsigned char *, void *))SHA1_Final,
+		(char *(*)(void *, char *))SHA1_End
+	},
+	{
+		"SHA224",
+		"SHA224",
+		SHA224_DIGEST_LENGTH,
+		STYLE_MD5,
+		0,
+		NULL,
+		(void (*)(void *))SHA224_Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA224_Update,
+		(void (*)(unsigned char *, void *))SHA224_Final,
+		(char *(*)(void *, char *))SHA224_End
 	},
 #endif /* !defined(SHA2_ONLY) */
 	{
@@ -195,10 +211,10 @@ struct hash_function {
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))SHA256Init,
-		(void (*)(void *, const unsigned char *, size_t))SHA256Update,
-		(void (*)(unsigned char *, void *))SHA256Final,
-		(char *(*)(void *, char *))SHA256End
+		(void (*)(void *))SHA256_Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA256_Update,
+		(void (*)(unsigned char *, void *))SHA256_Final,
+		(char *(*)(void *, char *))SHA256_End
 	},
 #if !defined(SHA2_ONLY)
 	{
@@ -208,10 +224,22 @@ struct hash_function {
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))SHA384Init,
-		(void (*)(void *, const unsigned char *, size_t))SHA384Update,
-		(void (*)(unsigned char *, void *))SHA384Final,
-		(char *(*)(void *, char *))SHA384End
+		(void (*)(void *))SHA384_Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA384_Update,
+		(void (*)(unsigned char *, void *))SHA384_Final,
+		(char *(*)(void *, char *))SHA384_End
+	},
+	{
+		"SHA512/256",
+		"SHA512t256",
+		SHA512_256_DIGEST_LENGTH,
+		STYLE_MD5,
+		0,
+		NULL,
+		(void (*)(void *))SHA512_256_Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA512_256_Update,
+		(void (*)(unsigned char *, void *))SHA512_256_Final,
+		(char *(*)(void *, char *))SHA512_256_End
 	},
 #endif /* !defined(SHA2_ONLY) */
 	{
@@ -221,10 +249,10 @@ struct hash_function {
 		STYLE_MD5,
 		0,
 		NULL,
-		(void (*)(void *))SHA512Init,
-		(void (*)(void *, const unsigned char *, size_t))SHA512Update,
-		(void (*)(unsigned char *, void *))SHA512Final,
-		(char *(*)(void *, char *))SHA512End
+		(void (*)(void *))SHA512_Init,
+		(void (*)(void *, const unsigned char *, size_t))SHA512_Update,
+		(void (*)(unsigned char *, void *))SHA512_Final,
+		(char *(*)(void *, char *))SHA512_End
 	},
 	{
 		NULL,
