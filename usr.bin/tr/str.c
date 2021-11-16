@@ -396,40 +396,32 @@ genseq(STR *s)
 static int
 backslash(STR *s)
 {
-	int ch, cnt, val;
+	size_t i;
+	int ch, val;
 
-	cnt = val = 0;
-	for (;;) {
-		/* Consume the character we're already on. */
-		s->str++;
+	assert(*s->str == '\\');
+	s->str++;
 
-		/* Look at the next character. */
-		ch = (unsigned char)s->str[0];
-		if (!isascii(ch) || !isdigit(ch)) {
-			break;
-		}
-		val = val * 8 + ch - '0';
-		if (++cnt == 3) {
-			/* Enough digits; consume this one and stop */
-			++s->str;
-			break;
-		}
-	}
-	if (cnt) {
-		/* We saw digits, so return their value */
-		if (val >= OOBCH)
-			errx(1, "Invalid octal character value");
-		return val;
-	}
-	if (ch == '\0') {
-		/* \<end> -> \ */
+	/* Empty escapes become plain backslashes. */
+	if (*s->str == '\0') {
 		s->state = EOS;
 		return '\\';
 	}
 
-	/* Consume the escaped character */
-	s->str++;
+	val = 0;
+	for (i = 0; i < 3; i++) {
+		if (s->str[i] < '0' || '7' < s->str[i])
+			break;
+		val = val * 8 + s->str[i] - '0';
+	}
+	if (i > 0) {
+		if (val >= OOBCH)
+			errx(1, "Invalid octal character value: %d", val);
+		s->str += i;
+		return val;
+	}
 
+	ch = *s->str++;
 	switch (ch) {
 	case 'a':			/* escape characters */
 		return '\7';

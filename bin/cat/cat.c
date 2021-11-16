@@ -245,7 +245,7 @@ raw_args(char **argv)
 					goto skip;
 			} else if (fflag) {
 				struct stat st;
-				fd = open(*argv, O_RDONLY|O_NONBLOCK, 0);
+				fd = open(*argv, O_RDONLY|O_NONBLOCK);
 				if (fd < 0)
 					goto skip;
 
@@ -259,7 +259,7 @@ raw_args(char **argv)
 					goto skipnomsg;
 				}
 			}
-			else if ((fd = open(*argv, O_RDONLY, 0)) < 0) {
+			else if ((fd = open(*argv, O_RDONLY)) < 0) {
 skip:
 				warn("%s", *argv);
 skipnomsg:

@@ -99,7 +99,7 @@ setup(void)
 		in.name = "stdin";
 		in.fd = STDIN_FILENO;
 	} else {
-		in.fd = open(in.name, O_RDONLY, 0);
+		in.fd = open(in.name, O_RDONLY);
 		if (in.fd == -1)
 			err(1, "%s", in.name);
 	}

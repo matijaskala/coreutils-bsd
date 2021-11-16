@@ -52,6 +52,7 @@
 #include <errno.h>
 #include <grp.h>
 #include <limits.h>
+#include <locale.h>
 #include <paths.h>
 #include <pwd.h>
 #include <stdio.h>
@@ -451,9 +452,9 @@ output(const struct stat *st, const char *file,
 		} while (1/*CONSTCOND*/);
 
 		size = -1;
-		if (isdigit((unsigned)*statfmt)) {
+		if (isdigit((unsigned char)*statfmt)) {
 			size = 0;
-			while (isdigit((unsigned)*statfmt)) {
+			while (isdigit((unsigned char)*statfmt)) {
 				size = (size * 10) + (*statfmt - '0');
 				statfmt++;
 				if (size < 0)
@@ -466,7 +467,7 @@ output(const struct stat *st, const char *file,
 			statfmt++;
 
 			prec = 0;
-			while (isdigit((unsigned)*statfmt)) {
+			while (isdigit((unsigned char)*statfmt)) {
 				prec = (prec * 10) + (*statfmt - '0');
 				statfmt++;
 				if (prec < 0)
@@ -712,6 +713,7 @@ format1(const struct stat *st,
 			ts.tv_sec = 0;
 			tm = localtime(&ts.tv_sec);
 		}
+		(void)setlocale(LC_TIME, "");
 		strftime(path, sizeof(path), timefmt, tm);
 		sdata = path;
 		formats = FMTF_DECIMAL | FMTF_OCTAL | FMTF_UNSIGNED | FMTF_HEX |

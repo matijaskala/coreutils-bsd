@@ -49,7 +49,6 @@ __RCSID("$NetBSD: who.c,v 1.25 2015/11/21 15:01:43 christos Exp $");
 #include <sys/stat.h>
 
 #include <err.h>
-#include <locale.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -106,8 +105,6 @@ main(int argc, char *argv[])
 {
 	int c, only_current_term, show_labels, quick_mode, default_mode;
 	int et = 0;
-
-	setlocale(LC_ALL, "");
 
 	only_current_term = show_term = show_idle = show_labels = 0;
 	quick_mode = default_mode = 0;
@@ -299,12 +296,12 @@ print(const char *name, const char *line, time_t t, const char *host,
 	if (show_term || show_idle) {
 		if (now == 0)
 			time(&now);
-		
+
 		if (stat(line, &sb) == 0) {
 			state = (sb.st_mode & 020) ? '+' : '-';
 			idle = now - sb.st_atime;
 		}
-		
+
 	}
 
 	(void)printf("%-*.*s ", (int)maxname, (int)maxname, name);
@@ -317,10 +314,10 @@ print(const char *name, const char *line, time_t t, const char *host,
 	(void)printf("%.12s ", tstr ? tstr + 4 : "?");
 
 	if (show_idle) {
-		if (idle < 60) 
+		if (idle < 60)
 			(void)printf("  .   ");
 		else if (idle < (24 * 60 * 60))
-			(void)printf("%02ld:%02ld ", 
+			(void)printf("%02ld:%02ld ",
 				     (long)(idle / (60 * 60)),
 				     (long)(idle % (60 * 60)) / 60);
 		else
@@ -337,7 +334,7 @@ print(const char *name, const char *line, time_t t, const char *host,
 			(void)printf(" type=%s ", types);
 		}
 	}
-	
+
 	if (*host)
 		(void)printf("\t(%.*s)", (int)maxhost, host);
 	(void)putchar('\n');

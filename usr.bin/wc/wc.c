@@ -188,7 +188,7 @@ cnt(const char *file)
 
 	linect = wordct = charct = longest = 0;
 	if (file != NULL) {
-		if ((fd = open(file, O_RDONLY, 0)) < 0) {
+		if ((fd = open(file, O_RDONLY)) < 0) {
 			warn("%s", file);
 			rval = 1;
 			return;

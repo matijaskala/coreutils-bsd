@@ -411,7 +411,7 @@ usage(void)
 	    "            "
 	    "[-I[date | hours | minutes | seconds]] [-z timezone]",
 	    "            "
-	    "[-f fmt date | [[[[[cc]yy]mm]dd]HH]MM[.ss]] [+format]"
+	    "[-f fmt date | [[[[[cc]yy]mm]dd]HH]MM[.SS]] [+format]"
 	    );
 	exit(1);
 }

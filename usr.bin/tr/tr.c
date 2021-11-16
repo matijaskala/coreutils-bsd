@@ -61,12 +61,13 @@ int
 main(int argc, char **argv)
 {
 	int ch, ch2, lastch;
-	int cflag, dflag, sflag, isstring2;
+	int cflag, dflag, sflag;
 	STR *s1, *s2;
 
 	cflag = dflag = sflag = 0;
-	while ((ch = getopt(argc, argv, "cds")) != -1)
+	while ((ch = getopt(argc, argv, "Ccds")) != -1)
 		switch (ch) {
+		case 'C':
 		case 'c':
 			cflag = 1;
 			break;
@@ -83,26 +84,16 @@ main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	switch(argc) {
-	case 0:
-	default:
+	if (argc < 1 || argc > 2)
 		usage();
-		/* NOTREACHED */
-	case 1:
-		isstring2 = 0;
-		break;
-	case 2:
-		isstring2 = 1;
-		break;
-	}
 
 	/*
-	 * tr -ds [-c] string1 string2
+	 * tr -ds [-Cc] string1 string2
 	 * Delete all characters (or complemented characters) in string1.
 	 * Squeeze all characters in string2.
 	 */
 	if (dflag && sflag) {
-		if (!isstring2)
+		if (argc != 2)
 			usage();
 
 		setup(string1, argv[0], 1, cflag);
@@ -117,11 +108,11 @@ main(int argc, char **argv)
 	}
 
 	/*
-	 * tr -d [-c] string1
+	 * tr -d [-Cc] string1
 	 * Delete all characters (or complemented characters) in string1.
 	 */
 	if (dflag) {
-		if (isstring2)
+		if (argc != 1)
 			usage();
 
 		setup(string1, argv[0], 1, cflag);
@@ -133,10 +124,10 @@ main(int argc, char **argv)
 	}
 
 	/*
-	 * tr -s [-c] string1
+	 * tr -s [-Cc] string1
 	 * Squeeze all characters (or complemented characters) in string1.
 	 */
-	if (sflag && !isstring2) {
+	if (sflag && argc == 1) {
 		setup(string1, argv[0], 1, cflag);
 
 		for (lastch = OOBCH; (ch = getchar()) != EOF;)
@@ -148,12 +139,12 @@ main(int argc, char **argv)
 	}
 
 	/*
-	 * tr [-cs] string1 string2
+	 * tr [-Ccs] string1 string2
 	 * Replace all characters (or complemented characters) in string1 with
 	 * the character in the same position in string2.  If the -s option is
 	 * specified, squeeze all the characters in string2.
 	 */
-	if (!isstring2)
+	if (argc != 2)
 		usage();
 
 	/*

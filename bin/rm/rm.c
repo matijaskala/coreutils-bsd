@@ -401,7 +401,7 @@ rm_overwrite(const char *file, struct stat *sbp)
 		      file, (uintmax_t)sbp->st_ino);
 		return (0);
 	}
-	if ((fd = open(file, O_WRONLY, 0)) == -1)
+	if ((fd = open(file, O_WRONLY)) == -1)
 		goto err;
 	if (fstatfs(fd, &fsb) == -1)
 		goto err;

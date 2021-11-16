@@ -265,7 +265,7 @@ fastcopy(const char *from, const char *to, struct stat *sbp)
 	mode_t oldmode;
 	int nread, from_fd, to_fd;
 
-	if ((from_fd = open(from, O_RDONLY, 0)) < 0) {
+	if ((from_fd = open(from, O_RDONLY)) < 0) {
 		warn("fastcopy: open() failed (from): %s", from);
 		return (1);
 	}
