@@ -285,9 +285,7 @@ split2(void)
 		if (pflag) {
 			regmatch_t pmatch;
 
-			pmatch.rm_so = 0;
-			pmatch.rm_eo = len - 1;
-			if (regexec(&rgx, bfr, 0, &pmatch, REG_STARTEND) == 0)
+			if (regexec(&rgx, bfr, 0, &pmatch, 0) == 0)
 				newfile();
 		} else if (lcnt++ == numlines) {
 			newfile();
