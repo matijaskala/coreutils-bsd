@@ -107,6 +107,10 @@ main(int argc, char *argv[])
 
 	(void)printf("%s\n", p);
 
+	fflush(stdout);
+	if (ferror(stdout))
+		err(EXIT_FAILURE, "stdout");
+
 	exit(EXIT_SUCCESS);
 	/* NOTREACHED */
 }
