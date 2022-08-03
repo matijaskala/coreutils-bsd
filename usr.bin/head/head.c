@@ -132,10 +132,19 @@ main(int argc, char *argv[])
 				first = 0;
 			}
 			head(fp, linecnt, bytecnt);
+			if (ferror(fp)) {
+				warn("%s", *argv);
+				eval = 1;
+			}
 			(void)fclose(fp);
 		}
-	else
+	else {
 		head(stdin, linecnt, bytecnt);
+		if (ferror(stdin)) {
+			warn("%s", "stdin");
+			eval = 1;
+		}
+	}
 	exit(eval);
 }
 
