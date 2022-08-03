@@ -39,6 +39,7 @@ __RCSID("$NetBSD: timeout.c,v 1.4 2014/08/05 08:20:02 christos Exp $");
 #include <sys/time.h>
 #include <sys/wait.h>
 
+#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <getopt.h>
@@ -116,8 +117,9 @@ parse_signal(const char *str)
 	int i;
 	char *ep;
 
-	if (strncasecmp(str, "SIG", 3) == 0) {
-		str += 3;
+	if (isalpha(*str)) {
+		if (strncasecmp(str, "SIG", 3) == 0) {
+			str += 3;
 
 		for (i = 1; i < NSIG; i++) {
 			if (strcasecmp(str, signalnamestr(i)) == 0)

@@ -1,4 +1,5 @@
-/* $NetBSD: cat.c,v 1.57 2016/06/16 00:52:37 sevan Exp $	*/
+/*	$OpenBSD: cat.c,v 1.32 2021/10/24 21:24:21 deraadt Exp $	*/
+/*	$NetBSD: cat.c,v 1.57 2016/06/16 00:52:37 sevan Exp $	*/
 
 /*
  * Copyright (c) 1989, 1993
@@ -64,12 +65,10 @@ __RCSID("$NetBSD: cat.c,v 1.57 2016/06/16 00:52:37 sevan Exp $");
 static int bflag, eflag, fflag, lflag, nflag, sflag, tflag, vflag;
 static size_t bsize;
 static int rval;
-static const char *filename;
 
-void cook_args(char *argv[]);
-void cook_buf(FILE *);
-void raw_args(char *argv[]);
-void raw_cat(int);
+void cat_file(const char *);
+void cook_buf(FILE *, const char *);
+void raw_cat(int, const char *);
 
 int
 main(int argc, char *argv[])
@@ -119,6 +118,7 @@ main(int argc, char *argv[])
 			    "[file ...]\n", getprogname());
 			return EXIT_FAILURE;
 		}
+	argc -= optind;
 	argv += optind;
 
 	if (lflag) {
@@ -130,47 +130,73 @@ main(int argc, char *argv[])
 			err(EXIT_FAILURE, "stdout");
 	}
 
-	if (bflag || eflag || nflag || sflag || tflag || vflag)
-		cook_args(argv);
+	if (argc == 0)
+		cat_file(NULL);
 	else
-		raw_args(argv);
+		for (; *argv != NULL; argv++)
+			cat_file(*argv);
 	if (fclose(stdout))
 		err(EXIT_FAILURE, "stdout");
 	return rval;
 }
 
 void
-cook_args(char **argv)
+cat_file(const char *path)
 {
 	FILE *fp;
+	int fd;
 
-	fp = stdin;
-	filename = "stdin";
-	do {
-		if (*argv) {
-			if (!strcmp(*argv, "-"))
-				fp = stdin;
-			else if ((fp = fopen(*argv,
-			    fflag ? "rf" : "r")) == NULL) {
-				warn("%s", *argv);
-				rval = EXIT_FAILURE;
-				++argv;
-				continue;
-			}
-			filename = *argv++;
+	if (bflag || eflag || nflag || sflag || tflag || vflag) {
+		if (path == NULL || strcmp(path, "-") == 0) {
+			cook_buf(stdin, path);
+			clearerr(stdin);
 		}
-		cook_buf(fp);
-		if (fp != stdin)
-			(void)fclose(fp);
-		else
-			clearerr(fp);
-	} while (*argv);
+		else if ((fp = fopen(path,
+		    fflag ? "rf" : "r")) == NULL) {
+			warn("%s", path);
+			rval = EXIT_FAILURE;
+		}
+		else {
+			cook_buf(fp, path);
+			fclose(fp);
+		}
+	} else {
+		if (path == NULL || strcmp(path, "-") == 0) {
+			raw_cat(STDIN_FILENO, "stdin");
+			return;
+		} else if (fflag) {
+			struct stat st;
+			fd = open(path, O_RDONLY|O_NONBLOCK);
+			if (fd < 0)
+				goto skip;
+
+			if (fstat(fd, &st) == -1) {
+				close(fd);
+				goto skip;
+			}
+			if (!S_ISREG(st.st_mode)) {
+				close(fd);
+				warnx("%s: not a regular file", path);
+				goto skipnomsg;
+			}
+		}
+		else if ((fd = open(path, O_RDONLY)) < 0) {
+skip:
+			warn("%s", path);
+skipnomsg:
+			rval = EXIT_FAILURE;
+			return;
+		}
+		raw_cat(fd, path);
+		close(fd);
+	}
 }
 
 void
-cook_buf(FILE *fp)
+cook_buf(FILE *fp, const char *path)
 {
-	int ch, gobble, line, prev;
+	unsigned long long line;
+	int ch, gobble, prev;
 
 	line = gobble = 0;
 	for (prev = '\n'; (ch = getc(fp)) != EOF; prev = ch) {
@@ -185,7 +211,7 @@ cook_buf(FILE *fp)
 			}
 			if (nflag) {
 				if (!bflag || ch != '\n') {
-					(void)fprintf(stdout, "%6d\t", ++line);
+					fprintf(stdout, "%6llu\t", ++line);
 					if (ferror(stdout))
 						break;
 				} else if (eflag) {
@@ -222,7 +248,7 @@ cook_buf(FILE *fp)
 			break;
 	}
 	if (ferror(fp)) {
-		warn("%s", filename);
+		warn("%s", path);
 		rval = EXIT_FAILURE;
 		clearerr(fp);
 	}
@@ -231,63 +257,16 @@ cook_buf(FILE *fp)
 }
 
 void
-raw_args(char **argv)
+raw_cat(int rfd, const char *path)
 {
-	int fd;
-
-	fd = fileno(stdin);
-	filename = "stdin";
-	do {
-		if (*argv) {
-			if (!strcmp(*argv, "-")) {
-				fd = fileno(stdin);
-				if (fd < 0)
-					goto skip;
-			} else if (fflag) {
-				struct stat st;
-				fd = open(*argv, O_RDONLY|O_NONBLOCK);
-				if (fd < 0)
-					goto skip;
-
-				if (fstat(fd, &st) == -1) {
-					close(fd);
-					goto skip;
-				}
-				if (!S_ISREG(st.st_mode)) {
-					close(fd);
-					warnx("%s: not a regular file", *argv);
-					goto skipnomsg;
-				}
-			}
-			else if ((fd = open(*argv, O_RDONLY)) < 0) {
-skip:
-				warn("%s", *argv);
-skipnomsg:
-				rval = EXIT_FAILURE;
-				++argv;
-				continue;
-			}
-			filename = *argv++;
-		} else if (fd < 0) {
-			err(EXIT_FAILURE, "stdin");
-		}
-		raw_cat(fd);
-		if (fd != fileno(stdin))
-			(void)close(fd);
-	} while (*argv);
-}
-
-void
-raw_cat(int rfd)
-{
-	static char *buf;
+	static char *buf = NULL;
 	static char fb_buf[BUFSIZ];
 
 	ssize_t nr, nw, off;
 	int wfd;
 
 	wfd = fileno(stdout);
-	if (wfd < 0)
+	if (wfd == -1)
 		err(EXIT_FAILURE, "stdout");
 	if (buf == NULL) {
 		struct stat sbuf;
@@ -307,12 +286,14 @@ raw_cat(int rfd)
 			buf = fb_buf;
 		}
 	}
-	while ((nr = read(rfd, buf, bsize)) > 0)
-		for (off = 0; nr; nr -= nw, off += nw)
-			if ((nw = write(wfd, buf + off, (size_t)nr)) < 0)
+	while ((nr = read(rfd, buf, bsize)) != -1 && nr != 0) {
+		for (off = 0; nr; nr -= nw, off += nw) {
+			if ((nw = write(wfd, buf + off, nr)) == -1 || nw == 0)
 				err(EXIT_FAILURE, "stdout");
-	if (nr < 0) {
-		warn("%s", filename);
+		}
+	}
+	if (nr == -1) {
+		warn("%s", path);
 		rval = EXIT_FAILURE;
 	}
 }
