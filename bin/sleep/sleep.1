@@ -1,5 +1,4 @@
-.\"	$NetBSD: sleep.1,v 1.27 2019/01/27 17:42:53 wiz Exp $
-.\"
+.\"-
 .\" Copyright (c) 1990, 1993, 1994
 .\"	The Regents of the University of California.  All rights reserved.
 .\"
@@ -32,7 +31,7 @@
 .\"
 .\"	@(#)sleep.1	8.3 (Berkeley) 4/18/94
 .\"
-.Dd January 26, 2019
+.Dd May 25, 2022
 .Dt SLEEP 1
 .Os
 .Sh NAME
@@ -40,43 +39,33 @@
 .Nd suspend execution for an interval of time
 .Sh SYNOPSIS
 .Nm
-.Ar seconds
+.Ar number Ns Op Ar unit
+.Ar ...
 .Sh DESCRIPTION
 The
 .Nm
-utility suspends execution for a minimum of
-.Ar seconds
-seconds, then exits.
-It is usually used to schedule the execution of other commands (see
-.Sx EXAMPLES
-below).
+command suspends execution for a minimum of
+.Ar number
+seconds (the default, or unit
+.Cm s ) ,
+minutes (unit
+.Cm m ) ,
+hours (unit
+.Cm h ) ,
+or days (unit
+.Cm d ) .
+If multiple arguments are passed, the delay will be the sum of all values.
 .Pp
-Note: The
-.Nx
-.Nm
-command will accept and honor a non-integer number of specified seconds.
-Note however, that if the request is for much more than 2.5 hours,
-any fractional seconds will be ignored.
-Permitting non-integral delays is a non-portable extension,
-and its use will decrease the probability that
-a shell script will execute properly on another system.
-.Pp
-When the
-.Dv SIGINFO
-signal is received, an estimate of the number of seconds remaining to
-sleep is printed on the standard output.
-.Sh EXIT STATUS
 The
 .Nm
-utility exits with one of the following values:
-.Bl -tag -width flag
-.It Li \&0
-On successful completion, or if the signal
-.Dv SIGALRM
-was received.
-.It Li \&>\&0
-An error occurred.
-.El
+command supports other time units than seconds,
+honors a non-integer number of time units to sleep in any form acceptable by
+.Xr strtod 3 ,
+and accepts more than one delay value.
+These are non-portable extensions, but they have also been implemented
+in GNU sh-utils since version 2.0a (released in 2002).
+.Sh EXIT STATUS
+.Ex -std
 .Sh EXAMPLES
 To schedule the execution of a command for 1800 seconds later:
 .Pp
@@ -152,12 +141,8 @@ compatible.
 .Sh HISTORY
 A
 .Nm
-utility appeared in
+command appeared in
 .At v4 .
-Processing fractional seconds, and processing the
-.Ic seconds
-argument respecting the current locale, was added in
-.Nx 1.3 .
 The ability to sleep for extended periods appeared in
 .Nx 9 .
 .Sh BUGS

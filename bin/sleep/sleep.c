@@ -1,6 +1,4 @@
-/* $NetBSD: sleep.c,v 1.30 2019/03/10 15:18:45 kre Exp $ */
-
-/*
+/*-
  * Copyright (c) 1988, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -29,32 +27,14 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__COPYRIGHT("@(#) Copyright (c) 1988, 1993, 1994\
- The Regents of the University of California.  All rights reserved.");
-#endif /* not lint */
-
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)sleep.c	8.3 (Berkeley) 4/2/94";
-#else
-__RCSID("$NetBSD: sleep.c,v 1.30 2019/03/10 15:18:45 kre Exp $");
-#endif
-#endif /* not lint */
-
-#include <ctype.h>
 #include <err.h>
 #include <errno.h>
-#include <locale.h>
-#include <math.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/time.h>
 
 static void alarmhandle(int);
 static void usage(void);
@@ -62,128 +42,63 @@ static void usage(void);
 int
 main(int argc, char *argv[])
 {
-	char *arg, *temp;
-	double fval, ival, val;
-	struct timespec ntime;
-	struct timespec endtime;
-	struct timespec now;
+	struct timespec time_to_sleep;
+	long double d, seconds;
 	time_t original;
-	int ch, fracflag;
-
-	setprogname(argv[0]);
-	(void)setlocale(LC_ALL, "");
+	char unit;
+	char buf[2];
+	int i, matches;
 
 	(void)signal(SIGALRM, alarmhandle);
 
-	while ((ch = getopt(argc, argv, "")) != -1)
-		switch(ch) {
-		default:
-			usage();
-		}
-	argc -= optind;
-	argv += optind;
-
-	if (argc != 1)
+	if (argc < 2)
 		usage();
 
-	/*
-	 * Okay, why not just use atof for everything? Why bother
-	 * checking if there is a fraction in use? Because the old
-	 * sleep handled the full range of integers, that's why, and a
-	 * double can't handle a large long. This is fairly useless
-	 * given how large a number a double can hold on most
-	 * machines, but now we won't ever have trouble. If you want
-	 * 1000000000.9 seconds of sleep, well, that's your
-	 * problem. Why use an isdigit() check instead of checking for
-	 * a period? Because doing it this way means locales will be
-	 * handled transparently by the atof code.
-	 *
-	 * Since fracflag is set for any non-digit, we also fall
-	 * into the floating point conversion path if the input
-	 * is hex (the 'x' in 0xA is not a digit).  Then if
-	 * strtod() handles hex (on NetBSD it does) so will we.
-	 * That path is also taken for scientific notation (1.2e+3)
-	 * and when the input is simply nonsense.
-	 */
-	fracflag = 0;
-	arg = *argv;
-	for (temp = arg; *temp != '\0'; temp++)
-		if (!isdigit((unsigned char)*temp)) {
-			ch = *temp;
-			fracflag++;
-		}
-
-	if (fracflag) {
-		/*
-		 * If we cannot convert the value using the user's locale
-		 * then try again using the C locale, so strtod() can always
-		 * parse values like 2.5, even if the user's locale uses
-		 * a different decimal radix character (like ',')
-		 *
-		 * (but only if that is the potential problem)
-		 */
-		val = strtod(arg, &temp);
-		if (*temp != '\0')
-			val = strtod(arg, &temp);
-		if (val < 0 || temp == arg || *temp != '\0')
-			usage();
-
-		ival = floor(val);
-		fval = (1000000000 * (val-ival));
-		ntime.tv_sec = ival;
-		if ((double)ntime.tv_sec != ival)
-			errx(1, "requested delay (%s) out of range", arg);
-		ntime.tv_nsec = fval;
-
-		if (ntime.tv_sec == 0 && ntime.tv_nsec == 0)
-			return EXIT_SUCCESS;	/* was 0.0 or underflowed */
-	} else {
-		errno = 0;
-		ntime.tv_sec = strtol(arg, &temp, 10);
-		if (ntime.tv_sec < 0 || temp == arg || *temp != '\0')
-			usage();
-		if (errno == ERANGE)
-			errx(EXIT_FAILURE, "Requested delay (%s) out of range",
-			    arg);
-		else if (errno != 0)
-			err(EXIT_FAILURE, "Requested delay (%s)", arg);
-
-		if (ntime.tv_sec == 0)
-			return EXIT_SUCCESS;
-		ntime.tv_nsec = 0;
+	seconds = 0;
+	for (i = 1; i < argc; i++) {
+		matches = sscanf(argv[1], "%Lf%c%1s", &d, &unit, buf);
+		if (matches == 2)
+			switch (unit) {
+			case 'd':
+				d *= 24;
+				/* FALLTHROUGH */
+			case 'h':
+				d *= 60;
+				/* FALLTHROUGH */
+			case 'm':
+				d *= 60;
+				/* FALLTHROUGH */
+			case 's':
+				break;
+			default:
+				usage();
+			}
+		else
+			if (matches != 1)
+				usage();
+		seconds += d;
 	}
+	if (seconds > INT64_MAX)
+		usage();
+	if (seconds <= 0)
+		return (0);
+	original = time_to_sleep.tv_sec = (time_t)seconds;
+	time_to_sleep.tv_nsec = 1e9 * (seconds - time_to_sleep.tv_sec);
 
-	original = ntime.tv_sec;
-	if (original < 86400) {
-		if (ntime.tv_nsec > 1000000000 * 2 / 3) {
-			original++;
-		}
+	while (nanosleep(&time_to_sleep, &time_to_sleep) != 0) {
+		if (errno != EINTR)
+			err(1, "nanosleep");
 	}
-
-	if (clock_gettime(CLOCK_MONOTONIC, &now) != 0)
-		err(EXIT_FAILURE, "clock_gettime");
-	timespecadd(&now, &ntime, &endtime);
-
-	if (endtime.tv_sec < now.tv_sec || (endtime.tv_sec == now.tv_sec &&
-	    endtime.tv_nsec <= now.tv_nsec))
-		errx(EXIT_FAILURE, "cannot sleep beyond the end of time");
-
-		int e;
-
-	if ((e = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME,
-	     &endtime, NULL)) == 0)
-		return EXIT_SUCCESS;
-
-	errno = e;
-	err(EXIT_FAILURE, "clock_nanotime");
+	return (0);
 }
 
 static void
 usage(void)
 {
-	(void)fprintf(stderr, "usage: %s seconds\n", getprogname());
+	fprintf(stderr, "usage: sleep number[unit] ...\n");
+	fprintf(stderr, "Unit can be 's' (seconds, the default), "
+			"m (minutes), h (hours), or d (days).\n");
 	exit(EXIT_FAILURE);
-	/* NOTREACHED */
 }
 
 /* ARGSUSED */
@@ -191,5 +106,4 @@ static void
 alarmhandle(int i)
 {
 	_exit(EXIT_SUCCESS);
-	/* NOTREACHED */
 }
