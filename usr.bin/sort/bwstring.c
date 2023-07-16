@@ -1,5 +1,5 @@
 /*-
- * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  * Copyright (C) 2009 Gabor Kovesdan <gabor@FreeBSD.org>
  * Copyright (C) 2012 Oleg Moskalenko <mom040267@gmail.com>
@@ -323,63 +323,6 @@ bwsfree(const struct bwstring *s)
 }
 
 /*
- * Copy content of src binary string to dst.
- * If the capacity of the dst string is not sufficient,
- * then the data is truncated.
- */
-size_t
-bwscpy(struct bwstring *dst, const struct bwstring *src)
-{
-	size_t nums = BWSLEN(src);
-
-	if (nums > BWSLEN(dst))
-		nums = BWSLEN(dst);
-
-	if (mb_cur_max == 1) {
-		memcpy(dst->cdata.str, src->cdata.str, nums);
-		dst->cdata.len = nums;
-		dst->cdata.str[dst->cdata.len] = '\0';
-	} else {
-		memcpy(dst->wdata.str, src->wdata.str,
-		    SIZEOF_WCHAR_STRING(nums));
-		dst->wdata.len = nums;
-		dst->wdata.str[nums] = L'\0';
-	}
-
-	return (nums);
-}
-
-/*
- * Copy content of src binary string to dst,
- * with specified number of symbols to be copied.
- * If the capacity of the dst string is not sufficient,
- * then the data is truncated.
- */
-struct bwstring *
-bwsncpy(struct bwstring *dst, const struct bwstring *src, size_t size)
-{
-	size_t nums = BWSLEN(src);
-
-	if (nums > BWSLEN(dst))
-		nums = BWSLEN(dst);
-	if (nums > size)
-		nums = size;
-
-	if (mb_cur_max == 1) {
-		memcpy(dst->cdata.str, src->cdata.str, nums);
-		dst->cdata.len = nums;
-		dst->cdata.str[nums] = '\0';
-	} else {
-		memcpy(dst->wdata.str, src->wdata.str,
-		    SIZEOF_WCHAR_STRING(nums));
-		dst->wdata.len = nums;
-		dst->wdata.str[nums] = L'\0';
-	}
-
-	return (dst);
-}
-
-/*
  * Copy content of src binary string to dst,
  * with specified number of symbols to be copied.
  * An offset value can be specified, from the start of src string.
@@ -467,119 +410,6 @@ bwsfwrite(struct bwstring *bws, FILE *f, bool zero_ended)
 		}
 		fwprintf(f, L"%lc", eols);
 		return (printed + 1);
-	}
-}
-
-/*
- * Allocate and read a binary string from file.
- * The strings are nl-ended or zero-ended, depending on the sort setting.
- */
-struct bwstring *
-bwsfgetln(FILE *f, size_t *len, bool zero_ended, struct reader_buffer *rb)
-{
-	wint_t eols;
-
-	eols = zero_ended ? btowc('\0') : btowc('\n');
-
-	if (!zero_ended && (mb_cur_max > 1)) {
-		wchar_t *ret;
-
-		ret = fgetwln(f, len);
-
-		if (ret == NULL) {
-			if (!feof(f))
-				err(2, NULL);
-			return (NULL);
-		}
-		if (*len > 0) {
-			if (ret[*len - 1] == (wchar_t)eols)
-				--(*len);
-		}
-		return (bwssbdup(ret, *len));
-
-	} else if (!zero_ended && (mb_cur_max == 1)) {
-		char *tmp = NULL;
-		size_t n = 0;
-
-		*len = getline(&tmp, &n, f);
-
-		if (*len == -1) {
-			free(tmp);
-			if (!feof(f))
-				err(2, NULL);
-			return (NULL);
-		}
-		if (*len > 0) {
-			if (tmp[*len - 1] == '\n')
-				--(*len);
-		}
-		struct bwstring *ret = bwscsbdup((unsigned char *)tmp, *len);
-		free(tmp);
-		return ret;
-
-	} else {
-		*len = 0;
-
-		if (feof(f))
-			return (NULL);
-
-		if (2 >= rb->fgetwln_z_buffer_size) {
-			rb->fgetwln_z_buffer_size += 256;
-			rb->fgetwln_z_buffer = sort_realloc(rb->fgetwln_z_buffer,
-			    sizeof(wchar_t) * rb->fgetwln_z_buffer_size);
-		}
-		rb->fgetwln_z_buffer[*len] = 0;
-
-		if (mb_cur_max == 1)
-			while (!feof(f)) {
-				int c;
-
-				c = fgetc(f);
-
-				if (c == EOF) {
-					if (*len == 0)
-						return (NULL);
-					goto line_read_done;
-				}
-				if (c == eols)
-					goto line_read_done;
-
-				if (*len + 1 >= rb->fgetwln_z_buffer_size) {
-					rb->fgetwln_z_buffer_size += 256;
-					rb->fgetwln_z_buffer = sort_realloc(rb->fgetwln_z_buffer,
-					    SIZEOF_WCHAR_STRING(rb->fgetwln_z_buffer_size));
-				}
-
-				rb->fgetwln_z_buffer[*len] = c;
-				rb->fgetwln_z_buffer[++(*len)] = 0;
-			}
-		else
-			while (!feof(f)) {
-				wint_t c;
-
-				c = fgetwc(f);
-
-				if (c == WEOF) {
-					if (*len == 0)
-						return (NULL);
-					goto line_read_done;
-				}
-				if (c == eols)
-					goto line_read_done;
-
-				if (*len + 1 >= rb->fgetwln_z_buffer_size) {
-					rb->fgetwln_z_buffer_size += 256;
-					rb->fgetwln_z_buffer = sort_realloc(rb->fgetwln_z_buffer,
-					    SIZEOF_WCHAR_STRING(rb->fgetwln_z_buffer_size));
-				}
-
-				rb->fgetwln_z_buffer[*len] = c;
-				rb->fgetwln_z_buffer[++(*len)] = 0;
-			}
-
-line_read_done:
-		/* we do not count the last 0 */
-		return (bwssbdup(rb->fgetwln_z_buffer, *len));
 	}
 }
 

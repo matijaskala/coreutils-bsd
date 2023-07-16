@@ -1,10 +1,10 @@
 include ../../common.mk
 
-CFLAGS += -D_GNU_SOURCE
+CFLAGS += -D_GNU_SOURCE -I../cksum
 
 all: sort sort.1
 
-sort: bwstring.c coll.c file.c mem.c radixsort.c sort.c vsort.c
+sort: bwstring.c coll.c file.c mem.c radixsort.c sort.c vsort.c ../cksum/md5c.c
 
 install-sort: all
 

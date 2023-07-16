@@ -1,7 +1,7 @@
 /*	$FreeBSD$	*/
 
 /*-
- * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  * Copyright (C) 2009 Gabor Kovesdan <gabor@FreeBSD.org>
  * Copyright (C) 2012 Oleg Moskalenko <mom040267@gmail.com>
@@ -39,6 +39,7 @@
 /*
  * mem.c
  */
+void *sort_calloc(size_t, size_t);
 void *sort_malloc(size_t);
 void sort_free(const void *ptr);
 void *sort_realloc(void *, size_t);
