@@ -1,4 +1,4 @@
-/*	$NetBSD: base64.c,v 1.2 2018/07/25 03:45:34 christos Exp $	*/
+/*	$NetBSD: base64.c,v 1.8 2023/08/23 19:16:14 rillig Exp $	*/
 
 /*-
  * Copyright (c) 2018 The NetBSD Foundation, Inc.
@@ -30,7 +30,7 @@
  */
 
 #include <sys/cdefs.h>
-__RCSID("$NetBSD: base64.c,v 1.2 2018/07/25 03:45:34 christos Exp $");
+__RCSID("$NetBSD: base64.c,v 1.8 2023/08/23 19:16:14 rillig Exp $");
 
 #include <ctype.h>
 #include <errno.h>
@@ -65,22 +65,21 @@ putoutput(FILE *fout, uint8_t out[4], size_t len, size_t wrap, size_t *pos)
 	size_t i;
 
 	for (i = 0; i < len + 1; i++) {
-		if (out[i] >= 64) {
+		if (out[i] >= 64)
 			return EINVAL;
-		}
-		if (fputc(B64[out[i]], fout) == -1)
+		if (fputc(B64[out[i]], fout) == EOF)
 			return errno;
 		if (++(*pos) == wrap) {
-			if (fputc('\n', fout) == -1)
+			if (fputc('\n', fout) == EOF)
 				return errno;
 			*pos = 0;
 		}
 	}
 	for (; i < 4; i++) {
-		if (fputc('=', fout) == -1)
+		if (fputc('=', fout) == EOF)
 			return errno;
 		if (++(*pos) == wrap) {
-			if (fputc('\n', fout) == -1)
+			if (fputc('\n', fout) == EOF)
 				return errno;
 			*pos = 0;
 		}
@@ -119,13 +118,12 @@ b64_encode(FILE *fout, FILE *fin, size_t wrap)
 			return e;
 	}
 
-	if (pos && wrap) {
-		if (fputc('\n', fout) == -1)
+	if (pos != 0 && wrap != 0) {
+		if (fputc('\n', fout) == EOF)
 			return errno;
 	}
 	return 0;
 }
-		
 
 static int
 b64_decode(FILE *fout, FILE *fin, bool ignore)
@@ -137,7 +135,7 @@ b64_decode(FILE *fout, FILE *fin, bool ignore)
 	state = 0;
 	out = 0;
 
-	while ((c = getc(fin)) != -1) {
+	while ((c = getc(fin)) != EOF) {
 		if (ignore && isspace(c))
 			continue;
 
@@ -152,23 +150,23 @@ b64_decode(FILE *fout, FILE *fin, bool ignore)
 
 		switch (state) {
 		case 0:
-			out = (uint8_t)(b << 2); 
+			out = (uint8_t)(b << 2);
 			break;
 		case 1:
 			out |= b >> 4;
-			if (fputc(out, fout) == -1)
+			if (fputc(out, fout) == EOF)
 				return errno;
 			out = (uint8_t)((b & 0xf) << 4);
 			break;
 		case 2:
 			out |= b >> 2;
-			if (fputc(out, fout) == -1)
+			if (fputc(out, fout) == EOF)
 				return errno;
 			out = (uint8_t)((b & 0x3) << 6);
 			break;
 		case 3:
 			out |= b;
-			if (fputc(out, fout) == -1)
+			if (fputc(out, fout) == EOF)
 				return errno;
 			out = 0;
 			break;
@@ -184,7 +182,7 @@ b64_decode(FILE *fout, FILE *fin, bool ignore)
 		case 1:
 			return EFTYPE;
 		case 2:
-			while ((c = getc(fin)) != -1) {
+			while ((c = getc(fin)) != EOF) {
 				if (ignore && isspace(c))
 					continue;
 				break;
@@ -193,12 +191,12 @@ b64_decode(FILE *fout, FILE *fin, bool ignore)
 				return EFTYPE;
 			/*FALLTHROUGH*/
 		case 3:
-			while ((c = getc(fin)) != -1) {
+			while ((c = getc(fin)) != EOF) {
 				if (ignore && isspace(c))
 					continue;
 				break;
 			}
-			if (c != -1)
+			if (c != EOF)
 				return EFTYPE;
 			return 0;
 		default:
@@ -206,13 +204,13 @@ b64_decode(FILE *fout, FILE *fin, bool ignore)
 		}
 	}
 
-	if (c != -1 || state != 0)
+	if (c != EOF || state != 0)
 		return EFTYPE;
 
 	return 0;
 }
 
-static void 
+static void
 usage(void)
 {
 	fprintf(stderr, "Usage: %s [-di] [-w <wrap>] [<file>]...\n",
@@ -276,7 +274,6 @@ main(int argc, char *argv[])
 		doit(stdout, fp, decode, ignore, wrap);
 		if (fp != stdin)
 			fclose(fp);
-		fclose(fp);
 	}
 
 	return EXIT_SUCCESS;
