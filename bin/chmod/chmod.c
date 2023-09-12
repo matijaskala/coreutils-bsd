@@ -74,7 +74,7 @@ main(int argc, char *argv[])
 	unsigned long val;
 	int oct;
 	mode_t omode;
-	int Hflag, Lflag, Rflag, ch, fflag, fts_options, hflag, rval, atflags;
+	int Hflag, Lflag, Rflag, ch, dflag, fflag, fts_options, hflag, rval, atflags;
 	uid_t uid;
 	gid_t gid;
 	u_int32_t fclear, fset;
@@ -107,6 +107,9 @@ main(int argc, char *argv[])
 			break;
 		case 'R':
 			Rflag = 1;
+			break;
+		case 'd':
+			dflag = 1;
 			break;
 		case 'f':		/* no longer documented. */
 			fflag = 1;
@@ -279,8 +282,11 @@ done:
 		}
 
 		if (ischmod) {
-			if (!fchmodat(AT_FDCWD, p->fts_accpath, oct ? omode :
-			    getmode(set, p->fts_statp->st_mode), atflags)
+			mode_t nval = oct ? omode :
+			    getmode(set, p->fts_statp->st_mode);
+			if (dflag && nval == p->fts_statp->st_mode)
+				continue;
+			if (!fchmodat(AT_FDCWD, p->fts_accpath, nval, atflags)
 			    || errno == ENOTSUP || fflag)
 				continue;
 		} else
@@ -368,6 +374,8 @@ static void
 usage(void)
 {
 	fprintf(stderr,
+	    ischmod ?
+	    "usage: %s [-dh] [-R [-H | -L | -P]] %s file ...\n" :
 	    "usage: %s [-h] [-R [-H | -L | -P]] %s file ...\n",
 	    __progname, ischmod ? "mode" :
 #ifdef ENABLE_CHFLAGS
