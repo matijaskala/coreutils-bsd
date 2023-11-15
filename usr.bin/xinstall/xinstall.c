@@ -88,13 +88,14 @@ int
 main(int argc, char *argv[])
 {
 	struct stat from_sb, to_sb;
-	void *set;
+	mode_t *set;
 	u_int iflags;
 	int ch, no_target;
 	char *to_name, *group = NULL, *owner = NULL;
 	const char *errstr;
 
 	iflags = 0;
+	set = NULL;
 	Tflag = 0;
 	while ((ch = getopt(argc, argv, "B:bCcDdF:g:m:o:pSsT")) != -1)
 		switch(ch) {
@@ -123,10 +124,9 @@ main(int argc, char *argv[])
 			group = optarg;
 			break;
 		case 'm':
+			free(set);
 			if (!(set = setmode(optarg)))
 				errx(1, "%s: invalid file mode", optarg);
-			mode = getmode(set, 0);
-			free(set);
 			break;
 		case 'o':
 			owner = optarg;
@@ -153,6 +153,14 @@ main(int argc, char *argv[])
 	/* some options make no sense when creating directories */
 	if ((docompare || dostrip) && dodir)
 		usage();
+
+	/*
+	 * Default permissions based on whether we're a directory or not, since
+	 * an +X may mean that we need to set the execute bit.
+	 */
+	if (set != NULL)
+		mode = getmode(set, dodir ? S_IFDIR : 0) & ~S_IFDIR;
+	free(set);
 
 	/* must have at least two arguments, except when creating directories */
 	if (argc == 0 || (argc == 1 && !dodir))
