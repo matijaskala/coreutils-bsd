@@ -66,9 +66,9 @@ static int bflag, eflag, fflag, lflag, nflag, sflag, tflag, vflag;
 static size_t bsize;
 static int rval;
 
-void cat_file(const char *);
-void cook_buf(FILE *, const char *);
-void raw_cat(int, const char *);
+static void cat_file(const char *);
+static void cook_buf(FILE *, const char *);
+static void raw_cat(int, const char *);
 
 int
 main(int argc, char *argv[])
@@ -140,7 +140,7 @@ main(int argc, char *argv[])
 	return rval;
 }
 
-void
+static void
 cat_file(const char *path)
 {
 	FILE *fp;
@@ -192,7 +192,7 @@ skipnomsg:
 	}
 }
 
-void
+static void
 cook_buf(FILE *fp, const char *path)
 {
 	unsigned long long line;
@@ -256,7 +256,7 @@ cook_buf(FILE *fp, const char *path)
 		err(EXIT_FAILURE, "stdout");
 }
 
-void
+static void
 raw_cat(int rfd, const char *path)
 {
 	static char *buf = NULL;
