@@ -176,7 +176,7 @@ main(int argc, char *argv[])
 		if (!valid_format(fmt))
 			errx(1, "invalid format string");
 		/*
-	         * XXX to be bug for bug compatible with Plan 9 add a
+		 * XXX to be bug for bug compatible with Plan 9 add a
 		 * newline if none found at the end of the format string.
 		 */
 	} else
@@ -184,8 +184,9 @@ main(int argc, char *argv[])
 
 	for (step = 1, cur = first; incr > 0 ? cur <= last : cur >= last;
 	    cur = first + incr * step++) {
+		if (step > 1)
+			fputs(sep, stdout);
 		printf(fmt, cur);
-		fputs(sep, stdout);
 		last_shown_value = cur;
 	}
 
@@ -204,14 +205,18 @@ main(int argc, char *argv[])
 	if (asprintf(&last_print, fmt, last) < 0)
 		err(1, "asprintf");
 	if (strcmp(cur_print, last_print) == 0 && cur != last_shown_value) {
-		fputs(last_print, stdout);
 		fputs(sep, stdout);
+		fputs(last_print, stdout);
 	}
 	free(cur_print);
 	free(last_print);
 
-	if (term != NULL)
+	if (term != NULL) {
+		fputs(sep, stdout);
 		fputs(term, stdout);
+	}
+
+	fputs("\n", stdout);
 
 	return (0);
 }
