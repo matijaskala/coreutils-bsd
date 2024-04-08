@@ -239,9 +239,10 @@ cnt(const char *file)
 				warn("%s", name);
 				rval = 1;
 			} else {
-				if (S_ISREG(sb.st_mode) ||
+				if (sb.st_size != 0 && (
+				    S_ISREG(sb.st_mode) ||
 				    S_ISLNK(sb.st_mode) ||
-				    S_ISDIR(sb.st_mode)) {
+				    S_ISDIR(sb.st_mode))) {
 					charct = sb.st_size;
 				} else {
 					while ((len =
