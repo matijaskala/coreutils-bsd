@@ -25,26 +25,28 @@
 #ifndef  _RMD160_H
 #define  _RMD160_H
 
+#include <stdint.h>
+
 #define	RMD160_BLOCK_LENGTH		64
 #define	RMD160_DIGEST_LENGTH		20
 #define	RMD160_DIGEST_STRING_LENGTH	(RMD160_DIGEST_LENGTH * 2 + 1)
 
 /* RMD160 context. */
 typedef struct RMD160Context {
-	u_int32_t state[5];			/* state */
-	u_int64_t count;			/* number of bits, mod 2^64 */
-	u_int8_t buffer[RMD160_BLOCK_LENGTH];	/* input buffer */
+	uint32_t state[5];			/* state */
+	uint64_t count;			/* number of bits, mod 2^64 */
+	uint8_t buffer[RMD160_BLOCK_LENGTH];	/* input buffer */
 } RMD160_CTX;
 
 __BEGIN_DECLS
 void	 RMD160Init(RMD160_CTX *);
-void	 RMD160Transform(u_int32_t [5], const u_int8_t [RMD160_BLOCK_LENGTH])
+void	 RMD160Transform(uint32_t [5], const uint8_t [RMD160_BLOCK_LENGTH])
 		__attribute__((__bounded__(__minbytes__,1,5)))
 		__attribute__((__bounded__(__minbytes__,2,RMD160_BLOCK_LENGTH)));
-void	 RMD160Update(RMD160_CTX *, const u_int8_t *, size_t)
+void	 RMD160Update(RMD160_CTX *, const uint8_t *, size_t)
 		__attribute__((__bounded__(__string__,2,3)));
 void	 RMD160Pad(RMD160_CTX *);
-void	 RMD160Final(u_int8_t [RMD160_DIGEST_LENGTH], RMD160_CTX *)
+void	 RMD160Final(uint8_t [RMD160_DIGEST_LENGTH], RMD160_CTX *)
 		__attribute__((__bounded__(__minbytes__,1,RMD160_DIGEST_LENGTH)));
 char	*RMD160End(RMD160_CTX *, char *)
 		__attribute__((__bounded__(__minbytes__,2,RMD160_DIGEST_STRING_LENGTH)));

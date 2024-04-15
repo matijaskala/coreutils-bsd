@@ -28,10 +28,13 @@
 
 #ifndef _MD4_H_
 #define _MD4_H_
+
+#include <stdint.h>
+
 /* MD4 context. */
 typedef struct MD4Context {
-  u_int32_t state[4];	/* state (ABCD) */
-  u_int32_t count[2];	/* number of bits, modulo 2^64 (lsb first) */
+  uint32_t state[4];	/* state (ABCD) */
+  uint32_t count[2];	/* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64];	/* input buffer */
 } MD4_CTX;
 #define MD4_DIGEST_LENGTH 16

@@ -29,7 +29,7 @@
  *  G(x) = x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 +
  *	   x^7 + x^5 + x^4 + x^2 + x + 1
  */
-static const u_int32_t crc32tab[] = {
+static const uint32_t crc32tab[] = {
 	0x00000000U,
 	0x04c11db7U, 0x09823b6eU, 0x0d4326d9U, 0x130476dcU, 0x17c56b6bU,
 	0x1a864db2U, 0x1e475005U, 0x2608edb8U, 0x22c9f00fU, 0x2f8ad6d6U,

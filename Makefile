@@ -49,4 +49,4 @@ clean-%: usr.sbin/%
 	@$(MAKE) -C $< clean
 
 pwcache.o: pwcache.c
-	$(CC) $(CFLAGS) $(shell pkg-config --cflags --libs libbsd-overlay) -D_PW_BUF_LEN=1024 -D_GR_BUF_LEN=2624 -c $< -o $@
+	$(CC) $(CFLAGS) -D_PW_BUF_LEN=1024 -D_GR_BUF_LEN=2624 -c $< -o $@

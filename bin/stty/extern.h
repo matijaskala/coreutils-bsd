@@ -40,6 +40,6 @@ int	ksearch(char ***, struct info *);
 int	msearch(char ***, struct info *);
 void	optlist(void);
 void	print(struct termios *, struct winsize *, int, enum FMT);
-void	usage(void) __dead2;
+__dead2 void	usage(void);
 
 extern struct cchar cchars1[], cchars2[];

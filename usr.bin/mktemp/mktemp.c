@@ -115,7 +115,7 @@ main(int argc, char *argv[])
 	(void)puts(tempfile);
 	free(tempfile);
 
-	exit(EXIT_SUCCESS);
+	return EXIT_SUCCESS;
 }
 
 void

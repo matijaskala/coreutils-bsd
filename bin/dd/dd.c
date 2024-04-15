@@ -71,7 +71,7 @@ size_t	cpy_cnt;		/* # of blocks to copy */
 u_int	ddflags;		/* conversion options */
 size_t	cbsz;			/* conversion block size */
 size_t	files_cnt = 1;		/* # of files to copy */
-const	u_char	*ctab;		/* conversion table */
+const	unsigned char	*ctab;		/* conversion table */
 
 int
 main(int argc, char *argv[])
@@ -360,7 +360,7 @@ dd_out(int force)
 	static int warned;
 	size_t cnt, n;
 	size_t nw;
-	u_char *outp;
+	unsigned char *outp;
 
 	/*
 	 * Write one or more blocks out.  The common case is writing a full

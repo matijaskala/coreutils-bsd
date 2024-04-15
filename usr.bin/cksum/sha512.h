@@ -30,7 +30,7 @@
 #define _SHA512_H_
 
 #ifndef _KERNEL
-#include <sys/types.h>
+#include <stdint.h>
 #endif
 
 #define SHA512_BLOCK_LENGTH		128

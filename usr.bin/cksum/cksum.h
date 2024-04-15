@@ -34,27 +34,27 @@ typedef struct CKSUMContext {
 } CKSUM_CTX;
 
 void	 CRC_Init(CKSUM_CTX *);
-void	 CRC_Update(CKSUM_CTX *, const u_int8_t *, size_t);
+void	 CRC_Update(CKSUM_CTX *, const uint8_t *, size_t);
 void	 CRC_Final(CKSUM_CTX *);
 char    *CRC_End(CKSUM_CTX *, char *);
-char    *CRC_Data(const u_int8_t *, size_t, char *);
+char    *CRC_Data(const uint8_t *, size_t, char *);
 
 void	 CRC32_Init(CKSUM_CTX *);
-void	 CRC32_Update(CKSUM_CTX *, const u_int8_t *, size_t);
+void	 CRC32_Update(CKSUM_CTX *, const uint8_t *, size_t);
 void	 CRC32_Final(CKSUM_CTX *);
 char    *CRC32_End(CKSUM_CTX *, char *);
-char    *CRC32_Data(const u_int8_t *, size_t, char *);
+char    *CRC32_Data(const uint8_t *, size_t, char *);
 
 void	 SUM1_Init(CKSUM_CTX *);
-void	 SUM1_Update(CKSUM_CTX *, const u_int8_t *, size_t);
+void	 SUM1_Update(CKSUM_CTX *, const uint8_t *, size_t);
 void	 SUM1_Final(CKSUM_CTX *);
 char    *SUM1_End(CKSUM_CTX *, char *);
-char    *SUM1_Data(const u_int8_t *, size_t, char *);
+char    *SUM1_Data(const uint8_t *, size_t, char *);
 
 void	 SUM2_Init(CKSUM_CTX *);
-void	 SUM2_Update(CKSUM_CTX *, const u_int8_t *, size_t);
+void	 SUM2_Update(CKSUM_CTX *, const uint8_t *, size_t);
 void	 SUM2_Final(CKSUM_CTX *);
 char    *SUM2_End(CKSUM_CTX *, char *);
-char    *SUM2_Data(const u_int8_t *, size_t, char *);
+char    *SUM2_Data(const uint8_t *, size_t, char *);
 
 int b64_ntop(const unsigned char *src, size_t srclength, char *target, size_t targsize);

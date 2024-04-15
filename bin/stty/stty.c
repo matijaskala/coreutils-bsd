@@ -39,7 +39,6 @@ static char sccsid[] = "@(#)stty.c	8.3 (Berkeley) 4/2/94";
 #endif /* not lint */
 #endif
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <sys/types.h>
 
@@ -62,7 +61,8 @@ main(int argc, char *argv[])
 	struct info i;
 	enum FMT fmt;
 	int ch;
-	const char *file, *errstr = NULL;
+	const char *file;
+	char *endptr;
 
 	fmt = NOTSET;
 	i.fd = STDIN_FILENO;
@@ -131,8 +131,8 @@ args:	argc -= optind;
 		if (isdigit(**argv)) {
 			speed_t speed;
 
-			speed = strtonum(*argv, 0, UINT_MAX, &errstr);
-			if (errstr)
+			speed = strtoul(*argv, &endptr, 10);
+			if (*endptr)
 				err(1, "speed");
 			cfsetospeed(&i.t, speed);
 			cfsetispeed(&i.t, speed);

@@ -304,13 +304,15 @@ read_pairs(FILE *f, struct ohash *h, int reverse, const char *name,
 {
 	int 		toggle;
 	struct node 	*a;
-	size_t 		size;
-	char 		*str;
+	size_t 		n, size;
+	char 		*s, *str;
 
 	toggle = 1;
 	a = NULL;
+	s = NULL;
 
-	while ((str = fgetln(f, &size)) != NULL) {
+	while ((size = getline(&s, &n, f)) != (size_t)(ssize_t)-1) {
+		str = s;
 		char *sentinel;
 
 		sentinel = str + size;
@@ -345,6 +347,7 @@ read_pairs(FILE *f, struct ohash *h, int reverse, const char *name,
 			str = e;
 		}
 	}
+	free(s);
 	if (toggle == 0)
 		errx(1, "odd number of node names in %s", name);
     	if (!feof(f))
@@ -356,10 +359,13 @@ static unsigned int
 read_hints(FILE *f, struct ohash *h, int quiet, const char *name,
     unsigned int order)
 {
-	char 		*str;
-	size_t 		size;
+	char 		*s, *str;
+	size_t 		n, size;
 
-	while ((str = fgetln(f, &size)) != NULL) {
+	s = NULL;
+
+	while ((size = getline(&s, &n, f)) != (size_t)(ssize_t)-1) {
+		str = s;
 		char *sentinel;
 
 		sentinel = str + size;
@@ -385,6 +391,7 @@ read_hints(FILE *f, struct ohash *h, int quiet, const char *name,
 			str = e;
 		}
 	}
+	free(s);
     	if (!feof(f))
 		err(1, "error reading %s", name);
 	return order;

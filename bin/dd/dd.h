@@ -38,8 +38,8 @@
 
 /* Input/output stream state. */
 typedef struct {
-	u_char	*db;			/* buffer address */
-	u_char	*dbp;			/* current buffer I/O address */
+	unsigned char	*db;			/* buffer address */
+	unsigned char	*dbp;			/* current buffer I/O address */
 	size_t	dbcnt;			/* current buffer byte count */
 	size_t	dbrcnt;			/* last read byte count */
 	size_t	dbsz;			/* buffer size */

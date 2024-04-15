@@ -46,10 +46,10 @@ enum _vflag vflag = FIRST;
 static off_t address;			/* address/offset in stream */
 static off_t eaddress;			/* end address */
 
-static __inline void print(PR *, u_char *);
+static __inline void print(PR *, unsigned char *);
 
 static __inline void
-print(PR *pr, u_char *bp)
+print(PR *pr, unsigned char *bp)
 {
 	long double ldbl;
 	   double f8;
@@ -153,9 +153,9 @@ display(void)
 	FU *fu;
 	PR *pr;
 	int cnt;
-	u_char *bp;
+	unsigned char *bp;
 	off_t saveaddress;
-	u_char savech = '\0', *savebp;
+	unsigned char savech = '\0', *savebp;
 
 	while ((bp = get()))
 	    for (fs = fshead, savebp = bp, saveaddress = address; fs;
@@ -220,15 +220,15 @@ bpad(PR *pr)
 
 static char **_argv;
 
-u_char *
+unsigned char *
 get(void)
 {
 	static int ateof = 1;
-	static u_char *curp, *savp;
+	static unsigned char *curp, *savp;
 	int n;
 	int need, nread;
 	int valid_save = 0;
-	u_char *tmpp;
+	unsigned char *tmpp;
 
 	if (!curp) {
 		if ((curp = calloc(1, blocksize)) == NULL)
@@ -266,7 +266,7 @@ get(void)
 			eaddress = address + nread;
 			return(curp);
 		}
-		n = fread((char *)curp + nread, sizeof(u_char),
+		n = fread((char *)curp + nread, sizeof(unsigned char),
 		    length == -1 ? need : MIN(length, need), stdin);
 		if (!n) {
 			if (ferror(stdin))

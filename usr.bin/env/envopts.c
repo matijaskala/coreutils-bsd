@@ -31,7 +31,6 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <sys/stat.h>
 #include <sys/param.h>
@@ -55,9 +54,9 @@ static int	 is_there(char *candidate);
  * of unsigned char.  Define some wrappers which take a value of type 'char',
  * whether signed or unsigned, and ensure the value ends up in the right range.
  */
-#define	isalnumch(Anychar) isalnum((u_char)(Anychar))
-#define	isalphach(Anychar) isalpha((u_char)(Anychar))
-#define	isspacech(Anychar) isspace((u_char)(Anychar))
+#define	isalnumch(Anychar) isalnum((unsigned char)(Anychar))
+#define	isalphach(Anychar) isalpha((unsigned char)(Anychar))
+#define	isspacech(Anychar) isspace((unsigned char)(Anychar))
 
 /*
  * Routine to determine if a given fully-qualified filename is executable.

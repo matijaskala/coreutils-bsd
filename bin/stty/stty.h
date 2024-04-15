@@ -47,7 +47,7 @@ struct info {
 struct cchar {
 	const char *name;
 	int sub;
-	u_char def;
+	unsigned char def;
 };
 
 enum FMT { NOTSET, GFLAG, BSD, POSIX };

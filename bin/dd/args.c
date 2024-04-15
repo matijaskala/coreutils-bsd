@@ -268,7 +268,7 @@ f_status(char *arg)
 static const struct conv {
 	const char *name;
 	u_int set, noset;
-	const u_char *ctab;
+	const unsigned char *ctab;
 } clist[] = {
 #ifndef	NO_CONV
 	{ "ascii",	C_ASCII,	C_EBCDIC,	e2a_POSIX },

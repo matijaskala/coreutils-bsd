@@ -33,7 +33,6 @@ static char sccsid[] = "@(#)key.c	8.3 (Berkeley) 4/2/94";
 #endif
 #endif /* not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <sys/ttydefaults.h>
 #include <sys/types.h>
@@ -159,7 +158,7 @@ void
 f_dec(struct info *ip)
 {
 
-	ip->t.c_cc[VERASE] = (u_char)0177;
+	ip->t.c_cc[VERASE] = (unsigned char)0177;
 	ip->t.c_cc[VKILL] = CTRL('u');
 	ip->t.c_cc[VINTR] = CTRL('c');
 	ip->t.c_lflag &= ~ECHOPRT;

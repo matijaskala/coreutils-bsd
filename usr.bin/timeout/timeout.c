@@ -30,7 +30,6 @@
 #include <sys/cdefs.h>
 #if !defined(lint)
 #if 0
-__FBSDID("$FreeBSD: head/usr.bin/timeout/timeout.c 268763 2014-07-16 13:52:05Z bapt $");
 #else
 __RCSID("$NetBSD: timeout.c,v 1.4 2014/08/05 08:20:02 christos Exp $");
 #endif
@@ -118,7 +117,7 @@ parse_signal(const char *str)
 	char *ep;
 
 	if (isalpha(*str)) {
-		if (strncasecmp(str, "SIG", 3) == 0) {
+		if (strncasecmp(str, "SIG", 3) == 0)
 			str += 3;
 
 		for (i = 1; i < NSIG; i++) {

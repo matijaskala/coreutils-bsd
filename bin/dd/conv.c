@@ -55,8 +55,8 @@ void
 def(void)
 {
 	size_t cnt;
-	u_char *inp;
-	const u_char *t;
+	unsigned char *inp;
+	const unsigned char *t;
 
 	if ((t = ctab) != NULL)
 		for (inp = in.dbp - (cnt = in.dbrcnt); cnt--; ++inp)
@@ -111,8 +111,8 @@ block(void)
 	static int intrunc;
 	int ch = -1;
 	size_t cnt, maxlen;
-	u_char *inp, *outp;
-	const u_char *t;
+	unsigned char *inp, *outp;
+	const unsigned char *t;
 
 	/*
 	 * Record truncation can cross block boundaries.  If currently in a
@@ -221,8 +221,8 @@ void
 unblock(void)
 {
 	size_t cnt;
-	u_char *inp;
-	const u_char *t;
+	unsigned char *inp;
+	const unsigned char *t;
 
 	/* Translation and case conversion. */
 	if ((t = ctab) != NULL)
@@ -255,7 +255,7 @@ void
 unblock_close(void)
 {
 	size_t cnt;
-	u_char *t;
+	unsigned char *t;
 
 	if (in.dbcnt) {
 		warnx("%s: short input record", in.name);

@@ -553,7 +553,7 @@ static void
 digest_end(const struct hash_function *hf, void *ctx, char *buf, size_t bsize,
     int base64)
 {
-	u_char *digest;
+	unsigned char *digest;
 
 	if (base64 == 1) {
 		if ((digest = malloc(hf->digestlen)) == NULL)
@@ -637,7 +637,7 @@ digest_file(const char *file, struct hash_list *hl, int echo)
 	struct hash_function *hf;
 	FILE *fp;
 	size_t nread;
-	u_char data[32 * 1024];
+	unsigned char data[32 * 1024];
 	char digest[MAX_DIGEST_LEN + 1];
 
 	if (strcmp(file, "-") == 0)
@@ -706,7 +706,7 @@ digest_filelist(const char *file, struct hash_function *defhash, int selcount,
 	FILE *listfp, *fp;
 	size_t len, linesize, nread;
 	int *sel_found = NULL;
-	u_char data[32 * 1024];
+	unsigned char data[32 * 1024];
 	union ANY_CTX context;
 	struct hash_function *hf;
 
@@ -904,8 +904,8 @@ digest_time(struct hash_list *hl, int times)
 	struct rusage start, stop;
 	struct timeval res;
 	union ANY_CTX context;
-	u_int i;
-	u_char data[TEST_BLOCK_LEN];
+	int i;
+	unsigned char data[TEST_BLOCK_LEN];
 	char digest[MAX_DIGEST_LEN + 1];
 	double elapsed;
 	int count = TEST_BLOCK_COUNT;
@@ -919,7 +919,7 @@ digest_time(struct hash_list *hl, int times)
 
 		/* Initialize data based on block number. */
 		for (i = 0; i < TEST_BLOCK_LEN; i++)
-			data[i] = (u_char)(i & 0xff);
+			data[i] = (unsigned char)(i & 0xff);
 
 		getrusage(RUSAGE_SELF, &start);
 		hf->init(&context);

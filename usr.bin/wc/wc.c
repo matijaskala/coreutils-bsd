@@ -175,12 +175,12 @@ do_mb(wchar_t *wc, const char *p, size_t len, mbstate_t *st,
 static void
 cnt(const char *file)
 {
-	u_char buf[1 << 16];
+	unsigned char buf[1 << 16];
 	wchar_t wbuf[1 << 16];
 	struct stat sb;
 	wc_count_t charct, linect, wordct, longest;
 	mbstate_t st;
-	u_char *C;
+	unsigned char *C;
 	wchar_t *WC;
 	const char *name;			/* filename or <stdin> */
 	size_t r = 0;

@@ -55,10 +55,10 @@
  * ACM, Volume 11, Number 11, November 1968, pp. 783-789.
  */
 
-u_char casetab[256];
+unsigned char casetab[256];
 
 /* EBCDIC to ASCII -- POSIX and System V compatible. */
-const u_char e2a_POSIX[] = {
+const unsigned char e2a_POSIX[] = {
 	0000, 0001, 0002, 0003, 0234, 0011, 0206, 0177,		/* 0000 */
 	0227, 0215, 0216, 0013, 0014, 0015, 0016, 0017,		/* 0010 */
 	0020, 0021, 0022, 0023, 0235, 0205, 0010, 0207,		/* 0020 */
@@ -94,7 +94,7 @@ const u_char e2a_POSIX[] = {
 };
 
 /* ASCII to EBCDIC -- POSIX and System V compatible. */
-const u_char a2e_POSIX[] = {
+const unsigned char a2e_POSIX[] = {
 	0000, 0001, 0002, 0003, 0067, 0055, 0056, 0057,		/* 0000 */
 	0026, 0005, 0045, 0013, 0014, 0015, 0016, 0017,		/* 0010 */
 	0020, 0021, 0022, 0023, 0074, 0075, 0062, 0046,		/* 0020 */
@@ -130,7 +130,7 @@ const u_char a2e_POSIX[] = {
 };
 
 /* ASCII to IBM EBCDIC -- POSIX and System V compatible. */
-const u_char a2ibm_POSIX[] = {
+const unsigned char a2ibm_POSIX[] = {
 	0000, 0001, 0002, 0003, 0067, 0055, 0056, 0057,		/* 0000 */
 	0026, 0005, 0045, 0013, 0014, 0015, 0016, 0017,		/* 0010 */
 	0020, 0021, 0022, 0023, 0074, 0075, 0062, 0046,		/* 0020 */

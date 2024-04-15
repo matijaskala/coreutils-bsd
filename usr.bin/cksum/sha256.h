@@ -30,7 +30,7 @@
 #define _SHA256_H_
 
 #ifndef _KERNEL
-#include <sys/types.h>
+#include <stdint.h>
 #endif
 
 #define SHA256_BLOCK_LENGTH		64
