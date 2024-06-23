@@ -451,6 +451,7 @@ static void
 printtime(time_t ftime)
 {
 	char longstring[80];
+	struct tm *tm;
 	static time_t now = 0;
 	const char *format;
 	static int d_first = -1;
@@ -476,7 +477,11 @@ printtime(time_t ftime)
 	else
 		/* mmm dd  yyyy || dd mmm  yyyy */
 		format = d_first ? "%e %b  %Y" : "%b %e  %Y";
-	ls_strftime(longstring, sizeof(longstring), format, localtime(&ftime));
+	if ((tm = localtime(&ftime)) == NULL) {
+		ftime = 0;
+		tm = localtime(&ftime);
+	}
+	ls_strftime(longstring, sizeof(longstring), format, tm);
 	fputs(longstring, stdout);
 	fputc(' ', stdout);
 }

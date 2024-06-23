@@ -455,7 +455,7 @@ dequeue(struct array *h)
 		enqueue((h), (n));		\
 	else					\
 		(h)->t[(h)->entries++] = (n);	\
-	} while(0);
+	} while(0)
 
 static void
 enqueue(struct array *h, struct node *n)
