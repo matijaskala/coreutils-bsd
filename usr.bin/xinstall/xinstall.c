@@ -663,13 +663,19 @@ create_tempfile(char *path, char *temp, size_t tsize)
 {
 	char *p;
 
-	strlcpy(temp, path, tsize);
+	if (strlcpy(temp, path, tsize) >= tsize) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
 	if ((p = strrchr(temp, '/')) != NULL)
 		p++;
 	else
 		p = temp;
 	*p = '\0';
-	strlcat(p, "INS@XXXXXXXXXX", tsize);
+	if (strlcat(p, "INS@XXXXXXXXXX", tsize) >= tsize) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
 
 	return(mkstemp(temp));
 }
